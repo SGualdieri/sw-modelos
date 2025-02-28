@@ -109,15 +109,14 @@ def plot(rhs_values, dual_values, real_rhs_value, text):
     dual_values_and_scale=[0]+dual_values
     plt.yticks(dual_values_and_scale) 
     
-    #Print current real value
+    #Print current value
     print("[debug] real_rhs_value:", real_rhs_value)
     plt.axvline(x=real_rhs_value, color='g', linestyle='--', label='Valor actual')
 
     plt.xlabel(text["xlabel"], labelpad=20, color='#DC143C')
     plt.ylabel(text["ylabel"], rotation=0, labelpad=90, color='#DC143C')
     plt.title(text["title"], pad=30)
-    plt.grid(True, which='both', linestyle='--', linewidth=0.2, color='gray', alpha=0.7)
-    
+    plt.grid(True, which='both', linestyle='--', linewidth=0.2, color='gray', alpha=0.7)    
     
     # Extender el último rango un poco hacia la derecha
     x_start = rhs_values[-1] # Punto donde comienza la línea
