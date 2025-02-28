@@ -1,8 +1,8 @@
 # Import libs
 import sys
-import matplotlib.pyplot as plt
 from docplex.mp.model import Model
 from docplex.mp.relax_linear import LinearRelaxer
+import matplotlib.pyplot as plt
 
 #def load_data():
 from data import load_data
@@ -81,37 +81,31 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
         return None  # Return None to indicate that the model is infeasible at this point
 
 
-# Plot the chart: objective vs. rhs value
-
-import matplotlib.pyplot as plt
-import matplotlib
-
-
-# AUX: VM
+# AUX: VM, Costo op, Curva de oferta
 # Optional: xunit: unit to plot for x-axis
 # Optional: yunit: unit to plot for y-axis
-def plot(rhs_values, dual_values, real_rhs_value, text):
+def plot(x_values, y_values, current_x_value, text):
 
     # Set default font size for all text elements
-    matplotlib.rcParams.update({'font.size': 18})
+    plt.rcParams.update({'font.size': 18})
     
     # Dibujar líneas horizontales entre los puntos
-    for i in range(len(rhs_values) - 1):
-        plt.hlines(dual_values[i], rhs_values[i], rhs_values[i + 1], linewidth=6, color='C0')
-        print("plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", dual_values[i], rhs_values[i], rhs_values[i + 1]) # debug
+    for i in range(len(x_values) - 1):
+        plt.hlines(y_values[i], x_values[i], x_values[i + 1], linewidth=6, color='C0')
+        print("plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
         # aux: es una línea horizontal con valor y=dual y valor x= de inicial a final.        
           
     # Set the x-axis and y-axis ticks to the values we are printing
-    aux_locs, aux_labels = plt.xticks(rhs_values)
+    aux_locs, aux_labels = plt.xticks(x_values)
     print("[debug], returned ticks:", aux_locs)
     #plt.yticks(dual_values)
     # Agregar el 0 a los yticks, por claridad
-    dual_values_and_scale=[0]+dual_values
-    plt.yticks(dual_values_and_scale) 
+    y_values_and_scale=[0]+y_values
+    plt.yticks(y_values_and_scale) 
     
     #Print current value
-    print("[debug] real_rhs_value:", real_rhs_value)
-    plt.axvline(x=real_rhs_value, color='g', linestyle='--', label='Valor actual')
+    print("[debug] current_x_value:", current_x_value)
+    plt.axvline(x=current_x_value, color='g', linestyle='--', label='Valor actual')
 
     plt.xlabel(text["xlabel"], labelpad=20, color='#DC143C')
     plt.ylabel(text["ylabel"], rotation=0, labelpad=90, color='#DC143C')
@@ -119,20 +113,20 @@ def plot(rhs_values, dual_values, real_rhs_value, text):
     plt.grid(True, which='both', linestyle='--', linewidth=0.2, color='gray', alpha=0.7)    
     
     # Extender el último rango un poco hacia la derecha
-    x_start = rhs_values[-1] # Punto donde comienza la línea
+    x_start = x_values[-1] # Punto donde comienza la línea
     x_offset = 20
-    y_value = dual_values[-1]
+    y_value = y_values[-1]
     plt.hlines(y=y_value, xmin=x_start, xmax=x_start + x_offset, color='C0', linewidth=6)
     
     # Dibujar un vector con origen al final del último punto (extendido) y dirección hacia el infinito horizontalmente
-    plt.annotate('', xy=(plt.xlim()[1], dual_values[-1]), xytext=(x_start + x_offset, dual_values[-1]),
+    plt.annotate('', xy=(plt.xlim()[1], y_values[-1]), xytext=(x_start + x_offset, y_values[-1]),
              arrowprops=dict(arrowstyle="->", lw=2, color='C0', linewidth=30))
     
     # Se puede ajustar la rotación y tamaño, si los números están muy cerca y se enciman
     plt.xticks(rotation=0, ha='center') # rotation=45, fontsize 18
 
     # Mostrar yticks desde el 0, por claridad
-    plt.ylim(bottom=0)             
+    plt.ylim(bottom=-1)         
 
     plt.figure(figsize=(20, 10))
     plt.show()
