@@ -81,23 +81,32 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
         return None  # Return None to indicate that the model is infeasible at this point
 
 
-# AUX: VM, Costo op, Curva de oferta
-# Optional: xunit: unit to plot for x-axis
-# Optional: yunit: unit to plot for y-axis
-def plot(x_values, y_values, current_x_value, text):
+# AUX: VM, Costo op, Curva de oferta, Funcional
+# Grafica.
+# Recibe
+#  - x_values, y_values, a graficar;
+#  - current_x_value al que le dibuja una línea punteada;
+#  - text es un diccionario que se obtiene con get_text_for_plot(..)
+#  - is_function_discontinuous (por defecto vale True) indica si la función es o no escalonada.
+def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=True):
 
     # Set default font size for all text elements
     plt.rcParams.update({'font.size': 18})
+    WIDTH=6
     
-    # Dibujar líneas horizontales entre los puntos
-    for i in range(len(x_values) - 1):
-        plt.hlines(y_values[i], x_values[i], x_values[i + 1], linewidth=6, color='C0')
-        print("plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
-        # aux: es una línea horizontal con valor y=dual y valor x= de inicial a final.        
+    if is_function_discontinuous:
+        # Dibujar líneas horizontales entre x y x+1, con valor y
+        for i in range(len(x_values) - 1):
+            plt.hlines(y_values[i], x_values[i], x_values[i + 1], linewidth=WIDTH, color='C0')
+            print("plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
+            
+    else:
+        WIDTH=3 # más fino, para que se aprecien los límites
+        plt.plot(x_values, y_values, marker='o', linewidth=WIDTH)
           
     # Set the x-axis and y-axis ticks to the values we are printing
     aux_locs, aux_labels = plt.xticks(x_values)
-    print("[debug], returned ticks:", aux_locs)
+    #print("[debug], returned ticks:", aux_locs)
     #plt.yticks(dual_values)
     # Agregar el 0 a los yticks, por claridad
     y_values_and_scale=[0]+y_values
@@ -114,9 +123,10 @@ def plot(x_values, y_values, current_x_value, text):
     
     # Extender el último rango un poco hacia la derecha
     x_start = x_values[-1] # Punto donde comienza la línea
+              # aux: ^ max(eso, current_x_value), si estuvieran separados
     x_offset = 20
     y_value = y_values[-1]
-    plt.hlines(y=y_value, xmin=x_start, xmax=x_start + x_offset, color='C0', linewidth=6)
+    plt.hlines(y=y_value, xmin=x_start, xmax=x_start + x_offset, color='C0', linewidth=WIDTH)
     
     # Dibujar un vector con origen al final del último punto (extendido) y dirección hacia el infinito horizontalmente
     plt.annotate('', xy=(plt.xlim()[1], y_values[-1]), xytext=(x_start + x_offset, y_values[-1]),

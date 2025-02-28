@@ -3,4 +3,4 @@ docplex
 matplotlib
 
 # (Para que funcionen los "%run common_model.ipynb")
-nbformat 
+#nbformat 
