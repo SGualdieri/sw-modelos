@@ -13,8 +13,8 @@ def load_data():
     # resources are a list of simple tuples (name, capacity)
     resources = [("Equipo1", 160),
                 ("Equipo2", 180),
-                ("Equipo3", 110)] ### Aux: orig, así estaba
-                #("Equipo3", 300)] ### Probando
+                #("Equipo3", 110)] ### Aux: orig, así estaba
+                ("Equipo3", 300)] ### Probando
 
     consumptions = {("A", "Equipo1"): 0.8,
                     ("B", "Equipo1"): 0.8,
