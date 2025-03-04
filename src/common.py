@@ -5,7 +5,7 @@ from docplex.mp.relax_linear import LinearRelaxer
 import matplotlib.pyplot as plt
 
 #def load_data():
-from data import load_data
+from data import load_data, LITTLE_M
 
 # Create the model with constraints and objective
 def create_model():
@@ -52,6 +52,7 @@ def solve_model(mdl, produccion_vars, products):
 
 ######### FUNCIONES COMUNES #########
 
+### ANTERIOR!!!
 # Perform sensitivity analysis of the RHS
 ### Aux: VM, Funcional, costo op
 def perform_sensitivity_analysis(mdl):
@@ -60,6 +61,23 @@ def perform_sensitivity_analysis(mdl):
     cpx = lp.get_engine().get_cplex()
 
     return cpx.solution.sensitivity.rhs()
+
+### NUEVO, PROBANDO, POR AHORA SOLO EN VM
+# Perform sensitivity analysis of the RHS
+### Aux: VM, Funcional, costo op
+# Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
+def perform_sensitivity_analysis(mdl, constraint):
+    lp = LinearRelaxer.make_relaxed_model(mdl)
+    lp.solve()
+    cpx = lp.get_engine().get_cplex()
+
+    rhs=cpx.solution.sensitivity.rhs()
+    names = cpx.linear_constraints.get_names()
+    print("[DEBUG] NOMBRES DE LAS RESTRICCIONES:\n", names)
+    idx=names.index(constraint)
+    print(f"Lower y upper para restr: {constraint}: {rhs[idx]}")
+    
+    return rhs[idx]
 
 # Adjust RHS and solve 
 ### Aux: misma función que VM, funcional, costo op
@@ -140,3 +158,152 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 
     plt.figure(figsize=(20, 10))
     plt.show()
+
+###################
+##### ITERATE #####
+###################
+
+# aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
+       # aux: cant parámetros...
+def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report):
+    x_list = []
+    y_list = []
+    rhs = lower - LITTLE_M
+    while True:
+        print("[debug] Viendo para rhs:", rhs)
+        if rhs < 0:
+            break ## Stop if the rhs is lower than 0                
+    
+        solution = solve(c, rhs, mdl, products, produccion_vars)
+        if solution is None:
+            break  # Stop if the model is infeasible
+        else:
+            #report(rhs, constraint_nameY.dual_value) #Diferencia con grafico funcional vs disp
+            #report(c_sens.rhs.constant, constraint_nameY.dual_value) ### Aux, veamos si así queda 126 y no 125.99
+            print("[debug al append] rhs:", rhs)
+            print("[debug al append] c_sens.rhs.constant:", c.rhs.constant)
+            report(x_list, y_list, rhs + LITTLE_M, constraint_nameY.dual_value)
+            
+        # Perform sensitivity analysis to get the new lower bound
+        new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
+        print("[debug] sensitivity", new_sensitivity)            
+        # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
+        #     if c_new_sens.name == constraint_nameX: 
+
+        (new_lower, _) = new_sensitivity
+        rhs = new_lower
+        if rhs < 0:
+            break ## Stop if the rhs is lower than 0                
+            
+        solution = solve(c, rhs, mdl, products, produccion_vars)
+        if solution is None:
+            break  # Stop if the model is infeasible
+        #report(c.rhs.constant, constraint_nameY.dual_value)
+        report(x_list, y_list, rhs, constraint_nameY.dual_value)
+        
+        rhs = new_lower - LITTLE_M #### aux: es para la sgte vuelta del while
+    
+    return x_list, y_list
+    
+
+# aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
+       # aux: cant parámetros...
+def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report):
+    x_list = []
+    y_list = []
+    rhs = upper + LITTLE_M
+    
+    while True:
+        print("[debug] Viendo para rhs:", rhs)
+        if rhs >= mdl.infinity:
+            break ## Stop if the rhs reaches or exceeds infinity
+
+        solution = solve(c, rhs, mdl, products, produccion_vars)
+        if solution is None:
+            break  # Stop if the model is infeasible
+        else:
+            report(x_list, y_list, rhs-LITTLE_M, constraint_nameY.dual_value) #Diferencia con grafico funcional vs disp
+
+        # Perform sensitivity analysis to get the new upper bound
+        new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
+        # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
+        #     if c_new_sens.name == constraint_nameX:
+        (_, new_upper) = new_sensitivity
+        rhs = new_upper
+        if rhs >= mdl.infinity:
+            break ## Stop if the rhs reaches or exceeds infinity
+
+        solution = solve(c, rhs, mdl, products, produccion_vars)
+        if solution is None:
+            break  # Stop if the model is infeasible
+        #report(c.rhs.constant, constraint_nameY.dual_value)
+        report(x_list, y_list, rhs, constraint_nameY.dual_value)
+        
+        rhs = new_upper + LITTLE_M
+        
+    return x_list, y_list
+
+# aux: ver cantidad de parámetros.
+# pre: se resolvió el modelo y existe solución.
+def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, report): # aux: var mdl, 'm', y funciones.
+    # Inicializo listas para acumular los resultados
+    rhs_values = []
+    dual_values = []
+
+    c = mdl.get_constraint_by_name(constraint_nameX)
+    if c is None:
+        print("Constraint with name '{0}' not found.".format(constraint_nameX))
+        return
+    # Obtengo lower y upper iniciales
+    initial_lower, initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX)
+    print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
+
+    # Obtengo punto actual
+    current_rhs_value = c.rhs.constant
+    current_dual_value = constraint_nameY.dual_value
+    print(f"[DEBUG] DUAL DE CURRENT_RHS: {constraint_nameY.dual_value}")
+
+
+    # Guardo puntos hacia atrás
+    #Decrease rhs starting from lower bound - m
+    left_x_list, left_y_list = iterate_left(c, initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report)
+    rhs_values.extend(reversed(left_x_list))
+    dual_values.extend(reversed(left_y_list))
+
+    # Guardo lower inicial y upper inicial
+    report(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
+    report(rhs_values, dual_values, current_rhs_value, current_dual_value)
+    rhs = initial_upper
+    if rhs < mdl.infinity:
+        report(rhs_values, dual_values, rhs, current_dual_value)
+    
+    # Guardo puntos hacia adelante
+    # Increase rhs starting from upper bound + m
+    right_x_list, right_y_list = iterate_right(c, initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report)
+    rhs_values.extend(right_x_list)
+    dual_values.extend(right_y_list)
+    
+    # Devuelvo el current
+    current_rhs_value=current_rhs_value
+    
+    return current_rhs_value, rhs_values, dual_values
+
+#################################
+### SOLO PARA CURVA DE OFERTA ###
+#################################
+### SOLO PARA VM
+def report(x_list, y_list, rhs_value, dual_value):
+    x_list.append(rhs_value)
+    y_list.append(dual_value) 
+
+### SOLO PARA CURVA DE OFERTA
+# Report values for the chart
+def report_with_min_dem(x_list, y_list, rhs_value, min_dem_constraint):
+    #internal_sortable_rhs_values.append(internal_value)
+    x_list.append(rhs_value)
+    y_list.append(-1 * min_dem_constraint.dual_value) #Diferencia con grafico funcional vs disp
+    
+def report_without_min_dem(x_list, y_list, rhs_value, prod_var):
+    #internal_sortable_rhs_values.append(internal_value)
+    x_list.append(rhs_value)    
+    y_list.append(-1 * prod_var.reduced_cost)

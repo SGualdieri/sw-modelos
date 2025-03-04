@@ -1,4 +1,6 @@
 
+LITTLE_M = 0.01
+
 def load_data():
     # human friendly problem name
     name = "guia5problematipo2"
