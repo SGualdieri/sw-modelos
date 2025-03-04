@@ -182,7 +182,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
             #report(c_sens.rhs.constant, constraint_nameY.dual_value) ### Aux, veamos si así queda 126 y no 125.99
             print("[debug al append] rhs:", rhs)
             print("[debug al append] c_sens.rhs.constant:", c.rhs.constant)
-            report(x_list, y_list, rhs + LITTLE_M, constraint_nameY.dual_value)
+            report(x_list, y_list, rhs + LITTLE_M, constraint_nameY)
             
         # Perform sensitivity analysis to get the new lower bound
         new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
@@ -199,7 +199,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
         if solution is None:
             break  # Stop if the model is infeasible
         #report(c.rhs.constant, constraint_nameY.dual_value)
-        report(x_list, y_list, rhs, constraint_nameY.dual_value)
+        report(x_list, y_list, rhs, constraint_nameY)
         
         rhs = new_lower - LITTLE_M #### aux: es para la sgte vuelta del while
     
@@ -222,7 +222,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            report(x_list, y_list, rhs-LITTLE_M, constraint_nameY.dual_value) #Diferencia con grafico funcional vs disp
+            report(x_list, y_list, rhs-LITTLE_M, constraint_nameY) #Diferencia con grafico funcional vs disp
 
         # Perform sensitivity analysis to get the new upper bound
         new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
@@ -237,7 +237,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         if solution is None:
             break  # Stop if the model is infeasible
         #report(c.rhs.constant, constraint_nameY.dual_value)
-        report(x_list, y_list, rhs, constraint_nameY.dual_value)
+        report(x_list, y_list, rhs, constraint_nameY)
         
         rhs = new_upper + LITTLE_M
         
@@ -271,11 +271,11 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     dual_values.extend(reversed(left_y_list))
 
     # Guardo lower inicial y upper inicial
-    report(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
-    report(rhs_values, dual_values, current_rhs_value, current_dual_value)
+    store(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
+    store(rhs_values, dual_values, current_rhs_value, current_dual_value)
     rhs = initial_upper
     if rhs < mdl.infinity:
-        report(rhs_values, dual_values, rhs, current_dual_value)
+        store(rhs_values, dual_values, rhs, current_dual_value)
     
     # Guardo puntos hacia adelante
     # Increase rhs starting from upper bound + m
@@ -292,7 +292,12 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 ### SOLO PARA CURVA DE OFERTA ###
 #################################
 ### SOLO PARA VM
-def report(x_list, y_list, rhs_value, dual_value):
+def report(x_list, y_list, rhs_value, constraint_nameY):
+    x_list.append(rhs_value)
+    y_list.append(constraint_nameY.dual_value) 
+
+# Igual que report, pero el 'y' recibido ya es el literal a guardar.
+def store(x_list, y_list, rhs_value, dual_value):
     x_list.append(rhs_value)
     y_list.append(dual_value) 
 
