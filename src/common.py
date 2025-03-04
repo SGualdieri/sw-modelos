@@ -165,7 +165,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report):
+def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
     x_list = []
     y_list = []
     rhs = lower - LITTLE_M
@@ -178,11 +178,9 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            #report(rhs, constraint_nameY.dual_value) #Diferencia con grafico funcional vs disp
-            #report(c_sens.rhs.constant, constraint_nameY.dual_value) ### Aux, veamos si así queda 126 y no 125.99
             print("[debug al append] rhs:", rhs)
             print("[debug al append] c_sens.rhs.constant:", c.rhs.constant)
-            report(x_list, y_list, rhs + LITTLE_M, constraint_nameY)
+            store(x_list, y_list, rhs + LITTLE_M, get_y_function(constraint_nameY))
             
         # Perform sensitivity analysis to get the new lower bound
         new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
@@ -198,8 +196,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
         solution = solve(c, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
-        #report(c.rhs.constant, constraint_nameY.dual_value)
-        report(x_list, y_list, rhs, constraint_nameY)
+        store(x_list, y_list, rhs, get_y_function(constraint_nameY))
         
         rhs = new_lower - LITTLE_M #### aux: es para la sgte vuelta del while
     
@@ -208,7 +205,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report):
+def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
     x_list = []
     y_list = []
     rhs = upper + LITTLE_M
@@ -222,7 +219,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            report(x_list, y_list, rhs-LITTLE_M, constraint_nameY) #Diferencia con grafico funcional vs disp
+            store(x_list, y_list, rhs-LITTLE_M, get_y_function(constraint_nameY))
 
         # Perform sensitivity analysis to get the new upper bound
         new_sensitivity = perform_sensitivity_analysis(mdl, constraint_nameX)
@@ -236,8 +233,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         solution = solve(c, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
-        #report(c.rhs.constant, constraint_nameY.dual_value)
-        report(x_list, y_list, rhs, constraint_nameY)
+        store(x_list, y_list, rhs, get_y_function(constraint_nameY))
         
         rhs = new_upper + LITTLE_M
         
@@ -245,7 +241,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
 
 # aux: ver cantidad de parámetros.
 # pre: se resolvió el modelo y existe solución.
-def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, report): # aux: var mdl, 'm', y funciones.
+def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
     # Inicializo listas para acumular los resultados
     rhs_values = []
     dual_values = []
@@ -260,13 +256,12 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 
     # Obtengo punto actual
     current_rhs_value = c.rhs.constant
-    current_dual_value = constraint_nameY.dual_value
-    print(f"[DEBUG] DUAL DE CURRENT_RHS: {constraint_nameY.dual_value}")
-
+    current_dual_value = get_y_function(constraint_nameY)#constraint_nameY.dual_value
+    print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
 
     # Guardo puntos hacia atrás
     #Decrease rhs starting from lower bound - m
-    left_x_list, left_y_list = iterate_left(c, initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report)
+    left_x_list, left_y_list = iterate_left(c, initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
     rhs_values.extend(reversed(left_x_list))
     dual_values.extend(reversed(left_y_list))
 
@@ -279,7 +274,7 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     
     # Guardo puntos hacia adelante
     # Increase rhs starting from upper bound + m
-    right_x_list, right_y_list = iterate_right(c, initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report)
+    right_x_list, right_y_list = iterate_right(c, initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
     rhs_values.extend(right_x_list)
     dual_values.extend(right_y_list)
     
@@ -292,23 +287,17 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 ### SOLO PARA CURVA DE OFERTA ###
 #################################
 ### SOLO PARA VM
-def report(x_list, y_list, rhs_value, constraint_nameY):
-    x_list.append(rhs_value)
-    y_list.append(constraint_nameY.dual_value) 
+def vm_get_y(constraint_nameY):    
+    return constraint_nameY.dual_value
 
 # Igual que report, pero el 'y' recibido ya es el literal a guardar.
-def store(x_list, y_list, rhs_value, dual_value):
-    x_list.append(rhs_value)
-    y_list.append(dual_value) 
+def store(x_list, y_list, x_value, y_value):
+    x_list.append(x_value)
+    y_list.append(y_value) 
 
 ### SOLO PARA CURVA DE OFERTA
-# Report values for the chart
-def report_with_min_dem(x_list, y_list, rhs_value, min_dem_constraint):
-    #internal_sortable_rhs_values.append(internal_value)
-    x_list.append(rhs_value)
-    y_list.append(-1 * min_dem_constraint.dual_value) #Diferencia con grafico funcional vs disp
+def co_get_y_with_min_dem(min_dem_constraint):
+    return -1 * min_dem_constraint.dual_value #Diferencia con grafico funcional vs disp
     
-def report_without_min_dem(x_list, y_list, rhs_value, prod_var):
-    #internal_sortable_rhs_values.append(internal_value)
-    x_list.append(rhs_value)    
-    y_list.append(-1 * prod_var.reduced_cost)
+def co_get_y_without_min_dem(prod_var):    
+    return -1 * prod_var.reduced_cost
