@@ -82,6 +82,7 @@ def perform_sensitivity_analysis(mdl, constraint):
 # Adjust RHS and solve 
 ### Aux: misma función que VM, funcional, costo op
   # mdl, products, produccion_vars
+  # A la c, le pone el rhs recibido.
 def solve(c, rhs_value, mdl, products, produccion_vars):
     print("---")
     print("- Adjusting RHS to: {0}".format(rhs_value))
@@ -265,7 +266,7 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     rhs_values.extend(reversed(left_x_list))
     dual_values.extend(reversed(left_y_list))
 
-    # Guardo lower inicial y upper inicial
+    # Guardo lower inicial, actual, y upper inicial
     store(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
     store(rhs_values, dual_values, current_rhs_value, current_dual_value)
     rhs = initial_upper
@@ -290,5 +291,4 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 def store(x_list, y_list, x_value, y_value):
     x_list.append(x_value)
     y_list.append(y_value) 
-
 
