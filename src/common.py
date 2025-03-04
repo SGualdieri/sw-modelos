@@ -284,20 +284,11 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     return current_rhs_value, rhs_values, dual_values
 
 #################################
-### SOLO PARA CURVA DE OFERTA ###
 #################################
-### SOLO PARA VM
-def vm_get_y(constraint_nameY):    
-    return constraint_nameY.dual_value
 
 # Igual que report, pero el 'y' recibido ya es el literal a guardar.
 def store(x_list, y_list, x_value, y_value):
     x_list.append(x_value)
     y_list.append(y_value) 
 
-### SOLO PARA CURVA DE OFERTA
-def co_get_y_with_min_dem(min_dem_constraint):
-    return -1 * min_dem_constraint.dual_value #Diferencia con grafico funcional vs disp
-    
-def co_get_y_without_min_dem(prod_var):    
-    return -1 * prod_var.reduced_cost
+
