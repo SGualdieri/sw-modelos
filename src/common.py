@@ -276,12 +276,6 @@ def iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, c
     initial_lower, initial_upper = perform_function(mdl, constraint_nameY)
     print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
-    # if c:
-    #     # Obtengo punto actual
-    #     current_rhs_value = c.rhs.constant
-    #     current_dual_value = get_y_function(constraint_nameY)#constraint_nameY.dual_value
-    #     print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
-
     # #Mejorable []
     # Esto es solo un hack para que cuando no hay c (ie cuando es costo de oportunidad)
     # se le pase la constraint_nameX a la solve_function.
@@ -296,8 +290,6 @@ def iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, c
 
     # Guardo lower inicial, actual, y upper inicial
     if initial_lower >= 0: ### AUX: agrego este check, xq da -1e20 para curva de oferta
-    #if initial_lower > -1*mdl.infinity: ### AUX: agrego este check, xq da -1e20 para curva de oferta        
-        #store(prices, quantities, initial_lower, current_quantity_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
         store(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
     store(rhs_values, dual_values, current_rhs_value, current_dual_value)
     rhs = initial_upper
