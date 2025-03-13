@@ -83,8 +83,7 @@ def perform_sensitivity_analysis(mdl, constraint):
 # Adjust RHS and solve 
 ### Aux: misma función que VM, funcional, costo op
   # mdl, products, produccion_vars
-  # A la c, le pone el rhs recibido.
-#def solve(c, rhs_value, mdl, products, produccion_vars):
+  # A la restriccción de constraint_nameX, le pone el rhs recibido.
 def solve(constraint_nameX, rhs_value, mdl, products, produccion_vars):
     print("---")
     # (Operación O(1))
@@ -174,7 +173,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_left(_c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
     rhs = lower - LITTLE_M
@@ -213,7 +212,7 @@ def iterate_left(_c, lower, mdl, products, produccion_vars, constraint_nameX, co
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_right(_c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
     rhs = upper + LITTLE_M
@@ -268,13 +267,13 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     current_dual_value = get_y_function(constraint_nameY)#constraint_nameY.dual_value
     print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
       
-    return iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: hay DEMASIADOS parámetros. Volver.
+    return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: hay DEMASIADOS parámetros. Volver.
 
 #######################
 # Función interna.
 # 'c' vale c cuando es llamada por iterate_over_rhs, para poder pasárselo a ... solve;
 #  y vale None cuando es llamada por iterate_over_price, que no usa ese parámetro.
-def iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
+def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
     # Inicializo listas para acumular los resultados
     rhs_values = []
     dual_values = []
@@ -283,15 +282,9 @@ def iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, c
     initial_lower, initial_upper = perform_function(mdl, constraint_nameY)
     print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
-    # #Mejorable []
-    # Esto es solo un hack para que cuando no hay c (ie cuando es costo de oportunidad)
-    # se le pase la constraint_nameX a la solve_function.
-    if c is None:
-        c = constraint_nameX
-
     # Guardo puntos hacia atrás
     #Decrease rhs starting from lower bound - m
-    left_x_list, left_y_list = iterate_left(c, initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
+    left_x_list, left_y_list = iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
     rhs_values.extend(reversed(left_x_list))
     dual_values.extend(reversed(left_y_list))
 
@@ -305,7 +298,7 @@ def iterate_internal(constraint_nameX, constraint_nameY, c, current_rhs_value, c
     
     # Guardo puntos hacia adelante
     # Increase rhs starting from upper bound + m
-    right_x_list, right_y_list = iterate_right(c, initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
+    right_x_list, right_y_list = iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
     rhs_values.extend(right_x_list)
     dual_values.extend(right_y_list)
     
