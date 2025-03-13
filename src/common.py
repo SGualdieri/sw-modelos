@@ -84,8 +84,15 @@ def perform_sensitivity_analysis(mdl, constraint):
 ### Aux: misma función que VM, funcional, costo op
   # mdl, products, produccion_vars
   # A la c, le pone el rhs recibido.
-def solve(c, rhs_value, mdl, products, produccion_vars):
+#def solve(c, rhs_value, mdl, products, produccion_vars):
+def solve(constraint_nameX, rhs_value, mdl, products, produccion_vars):
     print("---")
+    # (Operación O(1))
+    c = mdl.get_constraint_by_name(constraint_nameX)
+    if c is None:
+        print("Constraint with name '{0}' not found.".format(constraint_nameX))
+        return
+    
     print("- Adjusting RHS to: {0}".format(rhs_value))
     c.rhs = rhs_value
     solution = mdl.solve()
@@ -167,7 +174,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+def iterate_left(_c, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
     rhs = lower - LITTLE_M
@@ -176,7 +183,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
         if rhs < 0:
             break ## Stop if the rhs is lower than 0                
     
-        solution = solve_function(c, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         else:
@@ -194,7 +201,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
         if rhs < 0:
             break ## Stop if the rhs is lower than 0                
             
-        solution = solve_function(c, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         store(x_list, y_list, rhs, get_y_function(constraint_nameY))
@@ -206,7 +213,7 @@ def iterate_left(c, lower, mdl, products, produccion_vars, constraint_nameX, con
 
 # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
        # aux: cant parámetros...
-def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+def iterate_right(_c, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
     rhs = upper + LITTLE_M
@@ -216,7 +223,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         if rhs >= mdl.infinity:
             break ## Stop if the rhs reaches or exceeds infinity
 
-        solution = solve_function(c, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         else:
@@ -231,7 +238,7 @@ def iterate_right(c, upper, mdl, products, produccion_vars, constraint_nameX, co
         if rhs >= mdl.infinity:
             break ## Stop if the rhs reaches or exceeds infinity
 
-        solution = solve_function(c, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         store(x_list, y_list, rhs, get_y_function(constraint_nameY))
