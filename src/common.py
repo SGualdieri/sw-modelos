@@ -67,7 +67,7 @@ def solve_model(mdl, produccion_vars, products):
 ### Aux: VM, costo op, Funcional
 # Aux: la llama la iterate
 # Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
-def perform_sensitivity_analysis(mdl, constraint):
+def perform_sensitivity_analysis(mdl, constraint, _produccion_vars):
     lp = LinearRelaxer.make_relaxed_model(mdl)
     lp.solve()
     cpx = lp.get_engine().get_cplex()
@@ -191,7 +191,7 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
             store(x_list, y_list, rhs + LITTLE_M, get_y_function(constraint_nameY))
             
         # Perform sensitivity analysis to get the new lower bound
-        new_sensitivity = perform_function(mdl, constraint_nameX)
+        new_sensitivity = perform_function(mdl, constraint_nameX, produccion_vars)
         print("[debug] sensitivity", new_sensitivity)            
         # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX: 
@@ -230,7 +230,7 @@ def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, const
             store(x_list, y_list, rhs-LITTLE_M, get_y_function(constraint_nameY))
 
         # Perform sensitivity analysis to get the new upper bound
-        new_sensitivity = perform_function(mdl, constraint_nameX)
+        new_sensitivity = perform_function(mdl, constraint_nameX, produccion_vars)
         # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX:
         (_, new_upper) = new_sensitivity
@@ -260,7 +260,7 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     # debe agregarse a la lista en el momento dado (entre lower y upper iniciales).
 
     # Obtengo lower y upper iniciales
-    initial_lower, initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX)
+    initial_lower, initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
     print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
     
     # Obtengo punto actual
@@ -280,7 +280,7 @@ def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, curr
     dual_values = []
     
     # Obtengo lower y upper iniciales
-    initial_lower, initial_upper = perform_function(mdl, constraint_nameX)
+    initial_lower, initial_upper = perform_function(mdl, constraint_nameX, produccion_vars)
     print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
     # Guardo puntos hacia atrás
