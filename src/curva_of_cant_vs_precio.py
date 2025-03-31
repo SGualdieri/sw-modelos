@@ -3,7 +3,7 @@ from common import iterate_internal
 
 def get_prod_var_for(product_name, produccion_vars):
     prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
-    print(f"prod_var: {prod_var}")
+    
     if prod_var is None:
         raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
     return prod_var
@@ -25,7 +25,7 @@ def perform_sensitivity_analysis(mdl, prod_name, produccion_vars):
 
     idx=prod_var.index
     ranges = cpx.solution.sensitivity.objective()
-    print("[debug] lower, upper:", ranges[idx])
+    #print("[debug] lower, upper:", ranges[idx])
 
     return ranges[idx]
 
@@ -43,7 +43,7 @@ def iterate_over_price_en_construccion(prod_name, prod_var, mdl, products, produ
     idx = next((i for i, prod in enumerate(products) if prod[0] == prod_name), None)
     current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
     current_quantity_value = get_y(prod_var)
-    print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
+    #print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
 
     # Obtengo punto actual # [esto está repetido?]
     # Buscamos el product_name en el array "products" para consultar en su primera posición su precio
@@ -51,7 +51,7 @@ def iterate_over_price_en_construccion(prod_name, prod_var, mdl, products, produ
     idx = next((i for i, prod in enumerate(products) if prod[0] == prod_name), None)
     current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
     current_quantity_value = get_y(prod_var)
-    print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
+    #print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
     
     #return current_price_value, prices, quantities
     #return iterate_internal(constraint_nameX, constraint_nameY, c, mdl, products, produccion_vars, get_y_function) # aux: var mdl, 'm', y funciones.
@@ -62,7 +62,7 @@ def iterate_over_price_en_construccion(prod_name, prod_var, mdl, products, produ
 def iterate_over_price_for_var(product_name, mdl, products, produccion_vars):
     # esto da, por ejemplo prod_var_or_min_dem_constraint=list(produccion_vars.values())[0] ## "A"
     prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
-    print(f"prod_var: {prod_var}")
+    #print(f"[debug] prod_var: {prod_var}")
     if prod_var is None:
         raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
     

@@ -72,12 +72,11 @@ def perform_sensitivity_analysis(mdl, constraint, _produccion_vars):
     lp.solve()
     cpx = lp.get_engine().get_cplex()
 
-    print(f"[DEBUG] ### RECIBO CONSTRAINT: {constraint}, TYPE: {type(constraint)}\n")
     rhs=cpx.solution.sensitivity.rhs()
     names = cpx.linear_constraints.get_names()
-    print("[DEBUG] NOMBRES DE LAS RESTRICCIONES:\n", names)
+    #print("[DEBUG] NOMBRES DE LAS RESTRICCIONES:\n", names)
     idx=names.index(constraint)#.name)
-    print(f"Lower y upper para restr: {constraint}: {rhs[idx]}")
+    #print(f"[debug] Lower y upper para restr: {constraint}: {rhs[idx]}")
     
     return rhs[idx]
 
@@ -125,7 +124,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
         # Dibujar líneas horizontales entre x y x+1, con valor y
         for i in range(len(x_values) - 1):
             plt.hlines(y_values[i], x_values[i], x_values[i + 1], linewidth=WIDTH, color='C0')
-            print("plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
+            #print("[debug] plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
             
     else:
         WIDTH=3 # más fino, para que se aprecien los límites
@@ -179,7 +178,7 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
     y_list = []
     rhs = lower - LITTLE_M
     while True:
-        print("[debug] Viendo para rhs:", rhs)
+        #print("[debug] Viendo para rhs:", rhs)
         if rhs < 0:
             break ## Stop if the rhs is lower than 0                
     
@@ -187,12 +186,12 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            print("[debug al append] rhs:", rhs)            
+            #print("[debug al append] rhs:", rhs)            
             store(x_list, y_list, rhs + LITTLE_M, get_y_function(constraint_nameY))
             
         # Perform sensitivity analysis to get the new lower bound
         new_sensitivity = perform_function(mdl, constraint_nameX, produccion_vars)
-        print("[debug] sensitivity", new_sensitivity)            
+        #print("[debug] sensitivity", new_sensitivity)            
         # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX: 
 
@@ -206,7 +205,7 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
             break  # Stop if the model is infeasible
         store(x_list, y_list, rhs, get_y_function(constraint_nameY))
         
-        rhs = new_lower - LITTLE_M #### aux: es para la sgte vuelta del while
+        rhs = new_lower - LITTLE_M
     
     return x_list, y_list
     
@@ -219,7 +218,7 @@ def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, const
     rhs = upper + LITTLE_M
     
     while True:
-        print("[debug] Viendo para rhs:", rhs)
+        #print("[debug] Viendo para rhs:", rhs)
         if rhs >= mdl.infinity:
             break ## Stop if the rhs reaches or exceeds infinity
 
@@ -261,12 +260,12 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 
     # Obtengo lower y upper iniciales
     initial_lower, initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
-    print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
+    #print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
     
     # Obtengo punto actual
     current_rhs_value = c.rhs.constant
-    current_dual_value = get_y_function(constraint_nameY)#constraint_nameY.dual_value
-    print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
+    current_dual_value = get_y_function(constraint_nameY)
+    #print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
       
     return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: hay DEMASIADOS parámetros. Volver.
 

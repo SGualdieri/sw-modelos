@@ -162,21 +162,21 @@ def sort_after_iterate(rhs_values, objective_values):
     for i in range(len(rhs_values)):
         pairs.append((rhs_values[i], objective_values[i]))
 
-    print("pairs", pairs)
+    print("[debug] pairs", pairs)
 
     #pairs.sort()
     # Ordeno ascendentemente por la primera componente y Asc por la segunda si hay empates
     pairs.sort(key=lambda x: (x[0], x[1]))
 
-    print("pairs", pairs)
+    print("[debug] pairs", pairs)
 
     # Los vuelvo a separar en listas, para no cambiar la función plot
     new_rhs, new_obj = [], []
     for elem in pairs:
         new_rhs.append(elem[0])
         new_obj.append(elem[1])
-    print("new_rhs", new_rhs)
-    print("new_dual", new_obj)
+    print("[debug] new_rhs", new_rhs)
+    print("[debug] new_dual", new_obj)
     return new_rhs, new_obj
 
 #####################################
