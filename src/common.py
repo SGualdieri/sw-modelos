@@ -16,7 +16,7 @@ def create_model():
 
     # --- constraints ---
 
-    # --- resources disp equipo ---
+    # resources disp equipo
     mdl.add_constraints((mdl.sum(produccion_vars[p] * consumptions[p[0], res[0]] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
 
     # max demand
@@ -52,21 +52,13 @@ def solve_model(mdl, produccion_vars, products):
 
 ######### FUNCIONES COMUNES #########
 
-### ANTERIOR!!!
-# # Perform sensitivity analysis of the RHS
-# ### Aux: VM, Funcional, costo op
-# def perform_sensitivity_analysis(mdl):
-#     lp = LinearRelaxer.make_relaxed_model(mdl)
-#     lp.solve()
-#     cpx = lp.get_engine().get_cplex()
-
-#     return cpx.solution.sensitivity.rhs()
-
-### NUEVO, PROBANDO, POR AHORA SOLO EN VM y costo op (que usan este iterate+perform)
-# Perform sensitivity analysis of the RHS
+### Versión nueva, VM y costo op (que usan este iterate+perform)
 ### Aux: VM, costo op, Funcional
 # Aux: la llama la iterate
+# Perform sensitivity analysis of the RHS
 # Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
+# (produccion_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
+# Devuelve límites lower y upper del rango actual, solamente para la constraint especificada.
 def perform_sensitivity_analysis(mdl, constraint, _produccion_vars):
     lp = LinearRelaxer.make_relaxed_model(mdl)
     lp.solve()
@@ -190,12 +182,11 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
             store(x_list, y_list, rhs + LITTLE_M, get_y_function(constraint_nameY))
             
         # Perform sensitivity analysis to get the new lower bound
-        new_sensitivity = perform_function(mdl, constraint_nameX, produccion_vars)
+        new_lower, _ = perform_function(mdl, constraint_nameX, produccion_vars)
         #print("[debug] sensitivity", new_sensitivity)            
         # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
-        #     if c_new_sens.name == constraint_nameX: 
+        #     if c_new_sens.name == constraint_nameX:
 
-        (new_lower, _) = new_sensitivity
         rhs = new_lower
         if rhs < 0:
             break ## Stop if the rhs is lower than 0                
@@ -229,10 +220,10 @@ def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, const
             store(x_list, y_list, rhs-LITTLE_M, get_y_function(constraint_nameY))
 
         # Perform sensitivity analysis to get the new upper bound
-        new_sensitivity = perform_function(mdl, constraint_nameX, produccion_vars)
+        _, new_upper = perform_function(mdl, constraint_nameX, produccion_vars)
         # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX:
-        (_, new_upper) = new_sensitivity
+        
         rhs = new_upper
         if rhs >= mdl.infinity:
             break ## Stop if the rhs reaches or exceeds infinity
@@ -259,7 +250,7 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     # debe agregarse a la lista en el momento dado (entre lower y upper iniciales).
 
     # Obtengo lower y upper iniciales
-    initial_lower, initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
+    _initial_lower, _initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
     #print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
     
     # Obtengo punto actual
@@ -267,12 +258,14 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     current_dual_value = get_y_function(constraint_nameY)
     #print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
       
-    return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: hay DEMASIADOS parámetros. Volver.
+    return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: Volver para revisar gran cant de parámetros.
 
 #######################
 # Función interna.
-# 'c' vale c cuando es llamada por iterate_over_rhs, para poder pasárselo a ... solve;
-#  y vale None cuando es llamada por iterate_over_price, que no usa ese parámetro.
+#   constraint_nameX, constraint_nameY
+#   current_* se registran en los resultados en el orden correcto
+#   mdl, products, produccion_vars son necesarias para resolver el modelo y para encontrar variables
+#   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
 def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
     # Inicializo listas para acumular los resultados
     rhs_values = []
@@ -308,7 +301,7 @@ def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, curr
 #################################
 #################################
 
-# Igual que report, pero el 'y' recibido ya es el literal a guardar.
+# Almacena lo recibido, el 'y' recibido ya es el literal a guardar.
 def store(x_list, y_list, x_value, y_value):
     x_list.append(x_value)
     y_list.append(y_value) 

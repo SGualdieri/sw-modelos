@@ -42,3 +42,8 @@ def get_text_for_plot(constraint_nameX, product_name, xunit, yunit):
     ylabel='C. Oport \nprod min {}\n{}'.format(yunit, product_name)
     title='Costo de oportunidad del producto {}'.format(product_name)
     return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
+
+
+# Comentarios de debug, entreiterate y plot
+# print("rhs_values", rhs_values)
+# print("dual_values", dual_values)

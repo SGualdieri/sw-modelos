@@ -43,18 +43,7 @@ def iterate_over_price_en_construccion(prod_name, prod_var, mdl, products, produ
     idx = next((i for i, prod in enumerate(products) if prod[0] == prod_name), None)
     current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
     current_quantity_value = get_y(prod_var)
-    #print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
 
-    # Obtengo punto actual # [esto está repetido?]
-    # Buscamos el product_name en el array "products" para consultar en su primera posición su precio
-    # (aux: products tiene tuplas, esto obtiene la tupla que tiene 'product_name' como primer valor)
-    idx = next((i for i, prod in enumerate(products) if prod[0] == prod_name), None)
-    current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
-    current_quantity_value = get_y(prod_var)
-    #print(f"[DEBUG] QUANTITY DE CURRENT_PRICE: {current_quantity_value}")
-    
-    #return current_price_value, prices, quantities
-    #return iterate_internal(constraint_nameX, constraint_nameY, c, mdl, products, produccion_vars, get_y_function) # aux: var mdl, 'm', y funciones.
     return iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y, perform_sensitivity_analysis, solve_model_for_price) # aux: var mdl, 'm', y funciones.
 
 #################################
@@ -78,10 +67,10 @@ def iterate_over_price_for_var(product_name, mdl, products, produccion_vars):
 
     return current_price_value, x_values, y_values
 
+# Aux: específica de Curva de oferta
 # Solves the model for a given price por a product
 # price: price to consider
 # prod_name: product name ("A", "B", "C")
-# prod_number: product number considering their position in the objective (1 = "A", 2 = "B", 3 = "C", ...)
 # Al prod_name le pone el price, y resuelve.
 def solve_model_for_price(prod_name, price, mdl, products, produccion_vars):
 
@@ -109,3 +98,12 @@ def get_text_for_plot(product_name, xunit, yunit):
     title='Curva de Oferta del Producto {}'.format(product_name)
 
     return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
+
+
+### Comentarios de debug, entre iterate y plot
+# print("prices:", prices)
+# print("quantities:", quantities) 
+# print("current:", current_price_value) 
+
+# Round all values in the prices list to 2 decimal places    
+#prices = [round(price, 2) for price in prices] #
