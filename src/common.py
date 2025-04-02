@@ -4,19 +4,19 @@ from docplex.mp.model import Model
 import matplotlib.pyplot as plt
 
 #def load_data():
-from data import load_data
+from data import unpack_data
 
 # Create the model with constraints and objective
-def create_model():
-    name, products, resources, consumptions = load_data()
+def create_model(data_dict):
+    name, products, resources, consumptions = unpack_data(data_dict)
     mdl = Model(name)
 
     produccion_vars = mdl.continuous_var_dict(products, name='produccion')
 
     # --- constraints ---
 
-    # resources disp equipo
-    mdl.add_constraints((mdl.sum(produccion_vars[p] * consumptions[p[0], res[0]] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
+    # resources disp equipo and consumptions
+    mdl.add_constraints((mdl.sum(produccion_vars[p] * consumptions[res[0]][products.index(p)] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
 
     # max demand
     mdl.add_constraints((produccion_vars[p] <= p[2], 'DemandMax_%s' % p[0]) for p in products)
