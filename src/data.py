@@ -1,7 +1,8 @@
 
 LITTLE_M = 0.01
 
-def load_data():
+
+def create_data_dict():
     # human friendly problem name
     name = "guia5problematipo2"
 
@@ -27,4 +28,16 @@ def load_data():
                     ("A", "Equipo3"): 0.6,
                     ("B", "Equipo3"): 1,
                     ("C", "Equipo3"): 0.6}
+    return {"name": name, "products": products, "resources": resources, "consumptions": consumptions}
+
+def unpack_data(data_dict):
+    
+    try:
+        name = data_dict["name"]
+        products = data_dict["products"]
+        resources = data_dict["resources"]
+        consumptions = data_dict["consumptions"]
+    except Exception as e:
+        raise ValueError(f"ERROR: faltan datos de entrada: {e}")
+                            
     return name, products, resources, consumptions

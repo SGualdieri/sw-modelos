@@ -4,11 +4,11 @@ from docplex.mp.model import Model
 import matplotlib.pyplot as plt
 
 #def load_data():
-from data import load_data
+from data import unpack_data
 
 # Create the model with constraints and objective
-def create_model():
-    name, products, resources, consumptions = load_data()
+def create_model(data_dict):
+    name, products, resources, consumptions = unpack_data(data_dict)
     mdl = Model(name)
 
     produccion_vars = mdl.continuous_var_dict(products, name='produccion')
