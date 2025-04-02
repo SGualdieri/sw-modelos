@@ -116,7 +116,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
         # Dibujar líneas horizontales entre x y x+1, con valor y
         for i in range(len(x_values) - 1):
             plt.hlines(y_values[i], x_values[i], x_values[i + 1], linewidth=WIDTH, color='C0')
-            #print("[debug] plt.hline dual_values[i], rhs_values[i], rhs_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
+            #print("[debug] plt.hline y_values[i], x_values[i], x_values[i + 1]:", y_values[i], x_values[i], x_values[i + 1]) # debug
             
     else:
         WIDTH=3 # más fino, para que se aprecien los límites
@@ -266,10 +266,10 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
 #   current_* se registran en los resultados en el orden correcto
 #   mdl, products, produccion_vars son necesarias para resolver el modelo y para encontrar variables
 #   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
-def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
+def iterate_internal(constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
     # Inicializo listas para acumular los resultados
-    rhs_values = []
-    dual_values = []
+    x_values = [] # rhs values or prices
+    y_values = [] # dual value or quantities
     
     # Obtengo lower y upper iniciales
     initial_lower, initial_upper = perform_function(mdl, constraint_nameX, produccion_vars)
@@ -278,25 +278,25 @@ def iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, curr
     # Guardo puntos hacia atrás
     #Decrease rhs starting from lower bound - m
     left_x_list, left_y_list = iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
-    rhs_values.extend(reversed(left_x_list))
-    dual_values.extend(reversed(left_y_list))
+    x_values.extend(reversed(left_x_list))
+    y_values.extend(reversed(left_y_list))
 
     # Guardo lower inicial, actual, y upper inicial
     if initial_lower >= 0: ### AUX: agrego este check, xq da -1e20 para curva de oferta
-        store(rhs_values, dual_values, initial_lower, current_dual_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
-    store(rhs_values, dual_values, current_rhs_value, current_dual_value)
+        store(x_values, y_values, initial_lower, current_y_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
+    store(x_values, y_values, current_x_value, current_y_value)
     rhs = initial_upper
     if rhs < mdl.infinity:
-        store(rhs_values, dual_values, rhs, current_dual_value)
+        store(x_values, y_values, rhs, current_y_value)
     
     # Guardo puntos hacia adelante
     # Increase rhs starting from upper bound + m
     right_x_list, right_y_list = iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
-    rhs_values.extend(right_x_list)
-    dual_values.extend(right_y_list)
+    x_values.extend(right_x_list)
+    y_values.extend(right_y_list)
     
     # Devuelvo el current y las listas    
-    return current_rhs_value, rhs_values, dual_values
+    return current_x_value, x_values, y_values
 
 #################################
 #################################

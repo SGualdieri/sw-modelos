@@ -32,8 +32,8 @@ def perform_sensitivity_analysis(mdl, prod_name, produccion_vars):
 
 # aux: ver cantidad de parámetros.
 # pre: se resolvió el modelo y existe solución.
-#def iterate_over_price_en_construccion(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
-def iterate_over_price_en_construccion(prod_name, prod_var, mdl, products, produccion_vars): # aux: var mdl, 'm', y funciones.
+#def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
+def iterate_over_price(prod_name, prod_var, mdl, products, produccion_vars): # aux: var mdl, 'm', y funciones.
     PRICE_POSITION_IN_PRODUCTS = 1 # price position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
 
     # Obtengo punto actual
@@ -56,7 +56,7 @@ def iterate_over_price_for_var(product_name, mdl, products, produccion_vars):
         raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
     
     # Iteramos
-    current_price_value, prices, quantities = iterate_over_price_en_construccion(product_name, prod_var, mdl, products, produccion_vars)
+    current_price_value, prices, quantities = iterate_over_price(product_name, prod_var, mdl, products, produccion_vars)
     
     # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos    
     price = 0     

@@ -19,7 +19,9 @@ def iterate_over_rhs_checking_prod_min_dem(constraint_nameX, product_name, produ
 
     # Obtenemos la restricción (a la que tomarle el dual_value) si el producto tiene demanda mínima
     # o la variable del producto en caso contrario (al que tomarle el reduced_cost), para llamar a iterar
-    dem_min = products[idx][3] > 0
+    DEM_MIN_POSITION = 3 # position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
+    
+    dem_min = products[idx][DEM_MIN_POSITION] > 0
     if dem_min:
         print(f"Demanda mínima encontrada para el producto {product_name}.")
         constraint_nameY = f"DemandMin_{product_name}"
