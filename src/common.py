@@ -15,8 +15,8 @@ def create_model(data_dict):
 
     # --- constraints ---
 
-    # resources disp equipo
-    mdl.add_constraints((mdl.sum(produccion_vars[p] * consumptions[p[0], res[0]] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
+    # resources disp equipo and consumptions
+    mdl.add_constraints((mdl.sum(produccion_vars[p] * consumptions[res[0]][products.index(p)] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
 
     # max demand
     mdl.add_constraints((produccion_vars[p] <= p[2], 'DemandMax_%s' % p[0]) for p in products)

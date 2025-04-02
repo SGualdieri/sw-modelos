@@ -1,7 +1,6 @@
 
 LITTLE_M = 0.01
 
-
 def create_data_dict():
     # human friendly problem name
     name = "guia5problematipo2"
@@ -18,16 +17,13 @@ def create_data_dict():
                 ("Equipo2", 180),
                 ("Equipo3", 110)] ### Aux: orig, así estaba
                 #("Equipo3", 300)] ### Probando
+    
+    consumptions = {
+        "Equipo1": (0.8, 0.8, 0.3),  # ex 0.8*A + 0.8*B + 0.3*C
+        "Equipo2": (0.6, 1.2, 0),    # Consumptions for Equipo2
+        "Equipo3": (0.6, 1, 0.6)     # Consumptions for Equipo3
+    }
 
-    consumptions = {("A", "Equipo1"): 0.8,
-                    ("B", "Equipo1"): 0.8,
-                    ("C", "Equipo1"): 0.3,
-                    ("A", "Equipo2"): 0.6,
-                    ("B", "Equipo2"): 1.2,
-                    ("C", "Equipo2"): 0,
-                    ("A", "Equipo3"): 0.6,
-                    ("B", "Equipo3"): 1,
-                    ("C", "Equipo3"): 0.6}
     return {"name": name, "products": products, "resources": resources, "consumptions": consumptions}
 
 def unpack_data(data_dict):
