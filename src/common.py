@@ -168,18 +168,20 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
-    rhs = lower - LITTLE_M
+
+    x_coord = lower - LITTLE_M # rhs value or price
+
     while True:
-        #print("[debug] Viendo para rhs:", rhs)
-        if rhs < 0:
-            break ## Stop if the rhs is lower than 0                
+        #print("[debug] Viendo para rhs:", x_coord)
+        if x_coord < 0:
+            break ## Stop if x is lower than 0         
     
-        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            #print("[debug al append] rhs:", rhs)            
-            store(x_list, y_list, rhs + LITTLE_M, get_y_function(constraint_nameY))
+            #print("[debug al append] x_coord:", x_coord)            
+            store(x_list, y_list, x_coord + LITTLE_M, get_y_function(constraint_nameY))
             
         # Perform sensitivity analysis to get the new lower bound
         new_lower, _ = perform_function(mdl, constraint_nameX, produccion_vars)
@@ -187,16 +189,16 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
         # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX:
 
-        rhs = new_lower
-        if rhs < 0:
-            break ## Stop if the rhs is lower than 0                
+        x_coord = new_lower
+        if x_coord < 0:
+            break ## Stop if the x_coord is lower than 0                
             
-        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
-        store(x_list, y_list, rhs, get_y_function(constraint_nameY))
+        store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
         
-        rhs = new_lower - LITTLE_M
+        x_coord = new_lower - LITTLE_M
     
     return x_list, y_list
     
@@ -206,34 +208,35 @@ def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constr
 def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
     x_list = []
     y_list = []
-    rhs = upper + LITTLE_M
+
+    x_coord = upper + LITTLE_M # rhs value or price
     
     while True:
-        #print("[debug] Viendo para rhs:", rhs)
-        if rhs >= mdl.infinity:
-            break ## Stop if the rhs reaches or exceeds infinity
+        #print("[debug] Viendo para x_coord:", x_coord)
+        if x_coord >= mdl.infinity:
+            break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
         else:
-            store(x_list, y_list, rhs-LITTLE_M, get_y_function(constraint_nameY))
+            store(x_list, y_list, x_coord-LITTLE_M, get_y_function(constraint_nameY))
 
         # Perform sensitivity analysis to get the new upper bound
         _, new_upper = perform_function(mdl, constraint_nameX, produccion_vars)
         # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
         #     if c_new_sens.name == constraint_nameX:
         
-        rhs = new_upper
-        if rhs >= mdl.infinity:
-            break ## Stop if the rhs reaches or exceeds infinity
+        x_coord = new_upper
+        if x_coord >= mdl.infinity:
+            break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-        solution = solve_function(constraint_nameX, rhs, mdl, products, produccion_vars)
+        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
         if solution is None:
             break  # Stop if the model is infeasible
-        store(x_list, y_list, rhs, get_y_function(constraint_nameY))
+        store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
         
-        rhs = new_upper + LITTLE_M
+        x_coord = new_upper + LITTLE_M
         
     return x_list, y_list
 
@@ -256,8 +259,7 @@ def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, producci
     # Obtengo punto actual
     current_rhs_value = c.rhs.constant
     current_dual_value = get_y_function(constraint_nameY)
-    #print(f"[DEBUG] DUAL DE CURRENT_RHS: {current_dual_value}")
-      
+          
     return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: Volver para revisar gran cant de parámetros.
 
 #######################
@@ -276,7 +278,7 @@ def iterate_internal(constraint_nameX, constraint_nameY, current_x_value, curren
     print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
     # Guardo puntos hacia atrás
-    #Decrease rhs starting from lower bound - m
+    #Decrease x_coord starting from lower bound - m
     left_x_list, left_y_list = iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
     x_values.extend(reversed(left_x_list))
     y_values.extend(reversed(left_y_list))
@@ -285,12 +287,12 @@ def iterate_internal(constraint_nameX, constraint_nameY, current_x_value, curren
     if initial_lower >= 0: ### AUX: agrego este check, xq da -1e20 para curva de oferta
         store(x_values, y_values, initial_lower, current_y_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
     store(x_values, y_values, current_x_value, current_y_value)
-    rhs = initial_upper
-    if rhs < mdl.infinity:
-        store(x_values, y_values, rhs, current_y_value)
+    x_coord = initial_upper
+    if x_coord < mdl.infinity:
+        store(x_values, y_values, x_coord, current_y_value)
     
     # Guardo puntos hacia adelante
-    # Increase rhs starting from upper bound + m
+    # Increase x_coord starting from upper bound + m
     right_x_list, right_y_list = iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
     x_values.extend(right_x_list)
     y_values.extend(right_y_list)
