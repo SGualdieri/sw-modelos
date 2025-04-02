@@ -1,11 +1,10 @@
 # Import libs
 import sys
 from docplex.mp.model import Model
-from docplex.mp.relax_linear import LinearRelaxer
 import matplotlib.pyplot as plt
 
 #def load_data():
-from data import load_data, LITTLE_M
+from data import load_data
 
 # Create the model with constraints and objective
 def create_model():
@@ -52,52 +51,9 @@ def solve_model(mdl, produccion_vars, products):
 
 ######### FUNCIONES COMUNES #########
 
-### Versión nueva, VM y costo op (que usan este iterate+perform)
-### Aux: VM, costo op, Funcional
-# Aux: la llama la iterate
-# Perform sensitivity analysis of the RHS
-# Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
-# (produccion_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
-# Devuelve límites lower y upper del rango actual, solamente para la constraint especificada.
-def perform_sensitivity_analysis(mdl, constraint, _produccion_vars):
-    lp = LinearRelaxer.make_relaxed_model(mdl)
-    lp.solve()
-    cpx = lp.get_engine().get_cplex()
-
-    rhs=cpx.solution.sensitivity.rhs()
-    names = cpx.linear_constraints.get_names()
-    #print("[DEBUG] NOMBRES DE LAS RESTRICCIONES:\n", names)
-    idx=names.index(constraint)#.name)
-    #print(f"[debug] Lower y upper para restr: {constraint}: {rhs[idx]}")
-    
-    return rhs[idx]
-
-# Adjust RHS and solve 
-### Aux: misma función que VM, funcional, costo op
-  # mdl, products, produccion_vars
-  # A la restriccción de constraint_nameX, le pone el rhs recibido.
-def solve(constraint_nameX, rhs_value, mdl, products, produccion_vars):
-    print("---")
-    # (Operación O(1))
-    c = mdl.get_constraint_by_name(constraint_nameX)
-    if c is None:
-        print("Constraint with name '{0}' not found.".format(constraint_nameX))
-        return
-    
-    print("- Adjusting RHS to: {0}".format(rhs_value))
-    c.rhs = rhs_value
-    solution = mdl.solve()
-    
-    if solution is not None:       
-        print("* Production model solved with objective: {:g}".format(solution.objective_value))
-        print("* Total benefit=%g" % solution.objective_value)
-        for p in products:
-            print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p].solution_value))
-        return solution
-    else:
-        print("No solution found for RHS value: {0}".format(rhs_value))
-        return None  # Return None to indicate that the model is infeasible at this point
-
+################
+##### PLOT #####
+################
 
 # AUX: VM, Costo op, Curva de oferta, Funcional
 # Grafica.
@@ -158,153 +114,4 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
 
     plt.figure(figsize=(20, 10))
     plt.show()
-
-###################
-##### ITERATE #####
-###################
-
-# aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
-       # aux: cant parámetros...
-def iterate_left(lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
-    x_list = []
-    y_list = []
-
-    x_coord = lower - LITTLE_M # rhs value or price
-
-    while True:
-        #print("[debug] Viendo para rhs:", x_coord)
-        if x_coord < 0:
-            break ## Stop if x is lower than 0         
-    
-        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
-        if solution is None:
-            break  # Stop if the model is infeasible
-        else:
-            #print("[debug al append] x_coord:", x_coord)            
-            store(x_list, y_list, x_coord + LITTLE_M, get_y_function(constraint_nameY))
-            
-        # Perform sensitivity analysis to get the new lower bound
-        new_lower, _ = perform_function(mdl, constraint_nameX, produccion_vars)
-        #print("[debug] sensitivity", new_sensitivity)            
-        # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
-        #     if c_new_sens.name == constraint_nameX:
-
-        x_coord = new_lower
-        if x_coord < 0:
-            break ## Stop if the x_coord is lower than 0                
-            
-        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
-        if solution is None:
-            break  # Stop if the model is infeasible
-        store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
-        
-        x_coord = new_lower - LITTLE_M
-    
-    return x_list, y_list
-    
-
-# aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
-       # aux: cant parámetros...
-def iterate_right(upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
-    x_list = []
-    y_list = []
-
-    x_coord = upper + LITTLE_M # rhs value or price
-    
-    while True:
-        #print("[debug] Viendo para x_coord:", x_coord)
-        if x_coord >= mdl.infinity:
-            break ## Stop if the x_coord reaches or exceeds 'infinity'
-
-        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
-        if solution is None:
-            break  # Stop if the model is infeasible
-        else:
-            store(x_list, y_list, x_coord-LITTLE_M, get_y_function(constraint_nameY))
-
-        # Perform sensitivity analysis to get the new upper bound
-        _, new_upper = perform_function(mdl, constraint_nameX, produccion_vars)
-        # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
-        #     if c_new_sens.name == constraint_nameX:
-        
-        x_coord = new_upper
-        if x_coord >= mdl.infinity:
-            break ## Stop if the x_coord reaches or exceeds 'infinity'
-
-        solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
-        if solution is None:
-            break  # Stop if the model is infeasible
-        store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
-        
-        x_coord = new_upper + LITTLE_M
-        
-    return x_list, y_list
-
-# aux: ver cantidad de parámetros.
-# pre: se resolvió el modelo y existe solución.
-def iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
-
-    c = mdl.get_constraint_by_name(constraint_nameX)
-    if c is None:
-        print("Constraint with name '{0}' not found.".format(constraint_nameX))
-        return
-    
-    # Hago esto acá afuera, porque la obtención del punto actual depende de 'c' y el mismo
-    # debe agregarse a la lista en el momento dado (entre lower y upper iniciales).
-
-    # Obtengo lower y upper iniciales
-    _initial_lower, _initial_upper = perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
-    #print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
-    
-    # Obtengo punto actual
-    current_rhs_value = c.rhs.constant
-    current_dual_value = get_y_function(constraint_nameY)
-          
-    return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, perform_sensitivity_analysis, solve) # Aux: Volver para revisar gran cant de parámetros.
-
-#######################
-# Función interna.
-#   constraint_nameX, constraint_nameY
-#   current_* se registran en los resultados en el orden correcto
-#   mdl, products, produccion_vars son necesarias para resolver el modelo y para encontrar variables
-#   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
-def iterate_internal(constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
-    # Inicializo listas para acumular los resultados
-    x_values = [] # rhs values or prices
-    y_values = [] # dual value or quantities
-    
-    # Obtengo lower y upper iniciales
-    initial_lower, initial_upper = perform_function(mdl, constraint_nameX, produccion_vars)
-    print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
-
-    # Guardo puntos hacia atrás
-    #Decrease x_coord starting from lower bound - m
-    left_x_list, left_y_list = iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
-    x_values.extend(reversed(left_x_list))
-    y_values.extend(reversed(left_y_list))
-
-    # Guardo lower inicial, actual, y upper inicial
-    if initial_lower >= 0: ### AUX: agrego este check, xq da -1e20 para curva de oferta
-        store(x_values, y_values, initial_lower, current_y_value) #aux: puede ser none xq sol infeaseable, pero recién en la sgte vuelta de lower-m (y no aća)
-    store(x_values, y_values, current_x_value, current_y_value)
-    x_coord = initial_upper
-    if x_coord < mdl.infinity:
-        store(x_values, y_values, x_coord, current_y_value)
-    
-    # Guardo puntos hacia adelante
-    # Increase x_coord starting from upper bound + m
-    right_x_list, right_y_list = iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
-    x_values.extend(right_x_list)
-    y_values.extend(right_y_list)
-    
-    # Devuelvo el current y las listas    
-    return current_x_value, x_values, y_values
-
-#################################
-#################################
-
-# Almacena lo recibido, el 'y' recibido ya es el literal a guardar.
-def store(x_list, y_list, x_value, y_value):
-    x_list.append(x_value)
-    y_list.append(y_value) 
 

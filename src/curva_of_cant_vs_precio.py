@@ -1,5 +1,5 @@
 from docplex.mp.relax_linear import LinearRelaxer
-from common import iterate_internal
+from common_iterator import iterate_internal
 
 def get_prod_var_for(product_name, produccion_vars):
     prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)

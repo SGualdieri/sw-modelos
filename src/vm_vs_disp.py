@@ -1,3 +1,4 @@
+
 # Obtener la componente 'y' a registrar.
 def get_y(constraint_nameY):    
     return constraint_nameY.dual_value

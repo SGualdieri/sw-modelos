@@ -1,4 +1,4 @@
-from common import iterate_over_rhs
+from rhs_iterator import iterate_over_rhs
 
 # Funciones para obtener la componente 'y' a registrar.
 def get_y_with_min_dem(min_dem_constraint):
