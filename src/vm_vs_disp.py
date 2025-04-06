@@ -22,8 +22,10 @@ class VM(PlotKind):
         
         return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
 
-    # AUX: En construcción. También debería ser abstracto en superclase, viendo.
-    def iterate(self, constraint_nameX, constraint_nameY, mdl, products, produccion_vars):
+    # AUX: En construcción. También debería ser abstracto en superclase, viendo firmas y atributos (self).
+    def iterate(self, constraint_nameX, mdl, products, produccion_vars):
+        constraint_nameY = mdl.get_constraint_by_name(constraint_nameX)
+
         current_rhs_value, rhs_values, dual_values = iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, self.get_y)
         
         self.current_rhs_value, self.rhs_values, self.dual_values = current_rhs_value, rhs_values, dual_values
