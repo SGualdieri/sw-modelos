@@ -8,6 +8,44 @@
 
 from docplex.mp.relax_linear import LinearRelaxer
 
+from common import plot
+from plot_kind import PlotKind
+
+class Funcional(PlotKind):
+
+    def __init__(self):
+        super().__init__()
+        # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
+        self.current_rhs_value = None,
+        self.rhs_values = None,
+        self.dual_values = None
+
+    def get_y(self, solution):
+        """AUX: WILL use this after refactoring"""
+        solution.objective_value        
+
+    def get_text_for_plot(self, constraint_name, xunit, yunit):   
+        xlabel='{0}\n{1}'.format(constraint_name, xunit)
+        ylabel='Funcional\n{}'.format(yunit)
+        title='Funcional vs. {}'.format(constraint_name)
+
+        return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
+
+    
+    def iterate(self, constraint_name, mdl, products, produccion_vars):
+        real_rhs_value, rhs_values, objective_values = iterate_over_rhs(constraint_name, mdl, products, produccion_vars)
+
+        self.current_rhs_value, self.rhs_values, self.objective_values = real_rhs_value, rhs_values, objective_values
+        return real_rhs_value, rhs_values, objective_values # currently returned for debugging purposes
+        
+
+    def plot(self, constraint_name, x_unit, y_unit):
+        new_rhs, new_obj = sort_after_iterate(rhs_values, objective_values)
+
+        # Graficamos
+        plot_text = self.get_text_for_plot(constraint_name, x_unit, y_unit)
+        plot(new_rhs, new_obj, self.current_rhs_value, plot_text, is_function_discontinuous=False)
+
 ### ANTERIOR, se deben inicializar acá por compatibilidad con
 ### función iterate sin refactorizar.
 # Initialize lists to store the results
@@ -183,10 +221,3 @@ def sort_after_iterate(rhs_values, objective_values):
 ### FIN tema funciones anteriores ###
 #####################################
 
-
-def get_text_for_plot(constraint_name, xunit, yunit):   
-    xlabel='{0}\n{1}'.format(constraint_name, xunit)
-    ylabel='Funcional\n{}'.format(yunit)
-    title='Funcional vs. {}'.format(constraint_name)
-
-    return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
