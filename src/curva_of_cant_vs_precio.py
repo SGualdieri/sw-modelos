@@ -50,7 +50,7 @@ class CurvaDeOferta(PlotKind):
         # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
         # AUX: esto puede ir adentro de iterator []    
         price = 0     
-        _ = iterator.solve_model_for_price(product_name, price, mdl, products, produccion_vars)
+        _ = iterator.solve(product_name, price, mdl, products, produccion_vars)
         quantity = self.get_y(prod_var)
         x_values = [price] + prices
         y_values = [quantity] + quantities

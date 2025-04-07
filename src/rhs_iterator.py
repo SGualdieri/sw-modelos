@@ -3,7 +3,7 @@ from docplex.mp.relax_linear import LinearRelaxer
 
 from common_iterator import Iterator
 
-class RhsIterator():
+class RhsIterator(Iterator):
 
     ### Versión nueva, VM y costo op (que usan este iterate+perform)
     ### Aux: VM, costo op, Funcional
@@ -71,5 +71,4 @@ class RhsIterator():
         current_rhs_value = c.rhs.constant
         current_dual_value = get_y_function(constraint_nameY)
         
-        iterator = Iterator()
-        return iterator.iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # Aux: Volver para revisar gran cant de parámetros.
+        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # Aux: Volver para revisar gran cant de parámetros.

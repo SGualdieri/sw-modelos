@@ -2,9 +2,20 @@
 ##### ITERATE #####
 ###################
 
+from abc import ABC, abstractmethod
 from data import LITTLE_M
 
-class Iterator(): # AUX: Will be an abstract class once this refactor is done
+class Iterator(ABC):
+    
+    @abstractmethod
+    def perform_sensitivity_analysis(self, mdl, constraint, _produccion_vars):
+        "Debe ser implementado por cada subclase"
+        pass
+
+    @abstractmethod
+    def solve(self, constraint_nameX, rhs_value, mdl, products, produccion_vars):
+        "Debe ser implementado por cada subclase"
+        pass    
 
     # Función genérica, llamada desde wrappers.
     #   constraint_nameX, constraint_nameY

@@ -8,7 +8,7 @@ def get_prod_var_for(product_name, produccion_vars):
         raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
     return prod_var
 
-class PriceIterator():
+class PriceIterator(Iterator):
 
     # Aux: específica de Curva de oferta
     # Perform sensitivity analysis of the objective
@@ -32,7 +32,7 @@ class PriceIterator():
     # price: price to consider
     # prod_name: product name ("A", "B", "C")
     # Al prod_name le pone el price, y resuelve.
-    def solve_model_for_price(self, prod_name, price, mdl, products, produccion_vars):
+    def solve(self, prod_name, price, mdl, products, produccion_vars):
 
         # Función objetivo
         # Toma los coeficientes de los datos excepto por el de la variable prod_name para la cual considera el coeficiente 'price'
@@ -65,5 +65,4 @@ class PriceIterator():
         current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(prod_var)
 
-        iterator = Iterator()
-        return iterator.iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve_model_for_price) # aux: var mdl, 'm', y funciones.
+        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # aux: var mdl, 'm', y funciones.
