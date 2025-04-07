@@ -33,10 +33,9 @@ class Funcional(PlotKind):
 
     
     def iterate(self, constraint_name, mdl, products, produccion_vars):
-        real_rhs_value, rhs_values, objective_values = iterate_over_rhs(constraint_name, mdl, products, produccion_vars)
-
-        self.current_rhs_value, self.rhs_values, self.objective_values = real_rhs_value, rhs_values, objective_values
-        return real_rhs_value, rhs_values, objective_values # currently returned for debugging purposes
+        self.current_rhs_value, self.rhs_values, self.objective_values = iterate_over_rhs(constraint_name, mdl, products, produccion_vars)
+        
+        return self.current_rhs_value, self.rhs_values, self.objective_values # currently returned for debugging purposes
         
 
     def plot(self, constraint_name, x_unit, y_unit):

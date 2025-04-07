@@ -16,7 +16,7 @@ class CostoOportunidad(PlotKind):
         self._prod_var = None
 
 
-    # A possible implementarion
+    # A possible implementarion [revisar después, si no conviene un setter privado]
     def get_y(self, _constraint_nameY):
         #return self._get_y
         if self._min_dem_constraint:
@@ -32,10 +32,9 @@ class CostoOportunidad(PlotKind):
     
 
     def iterate(self, constraint_nameX, product_name, products, produccion_vars, mdl):
-        current_rhs_value, rhs_values, dual_values = self.iterate_over_rhs_checking_prod_min_dem(constraint_nameX, product_name, products, produccion_vars, mdl)
+        self.current_rhs_value, self.rhs_values, self.dual_values = self.iterate_over_rhs_checking_prod_min_dem(constraint_nameX, product_name, products, produccion_vars, mdl)
         
-        self.current_rhs_value, self.rhs_values, self.dual_values = current_rhs_value, rhs_values, dual_values
-        return current_rhs_value, rhs_values, dual_values # returned for debugging purposes
+        return self.current_rhs_value, self.rhs_values, self.dual_values # returned for debugging purposes
 
 
     def plot(self, constraint_nameX, product_name, x_unit, y_unit):

@@ -26,10 +26,9 @@ class CurvaDeOferta(PlotKind):
     # AUX: will extract pms later, and make these abstract methods as well
     
     def iterate(self, product_name, mdl, products, produccion_vars):
-        current_price_value, prices, quantities = self.iterate_over_price_for_var(product_name, mdl, products, produccion_vars)
-        self.current_price_value, self.prices, self.quantities = current_price_value, prices, quantities
+        self.current_price_value, self.prices, self.quantities = self.iterate_over_price_for_var(product_name, mdl, products, produccion_vars)
         
-        return current_price_value, prices, quantities
+        return self.current_price_value, self.prices, self.quantities
     
     def plot(self, product_name, x_unit, y_unit):
         plot_text = self.get_text_for_plot(product_name, x_unit, y_unit)
