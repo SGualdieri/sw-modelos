@@ -1,7 +1,6 @@
-from common import plot
-from rhs_iterator import iterate_over_rhs
-
 from plot_kind import PlotKind
+from rhs_iterator import iterate_over_rhs
+from plot_kind_plotter import plot
 
 class CostoOportunidad(PlotKind):
 

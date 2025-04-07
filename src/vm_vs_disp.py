@@ -1,6 +1,6 @@
-from common import plot
 from plot_kind import PlotKind
 from rhs_iterator import iterate_over_rhs
+from plot_kind_plotter import plot
 
 class VM(PlotKind):
     def __init__(self):

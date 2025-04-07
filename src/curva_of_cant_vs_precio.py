@@ -1,6 +1,6 @@
-from common import plot
 from plot_kind import PlotKind
 from price_iterator import iterate_over_price, solve_model_for_price
+from plot_kind_plotter import plot
 
 class CurvaDeOferta(PlotKind):
 

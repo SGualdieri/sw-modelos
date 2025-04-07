@@ -8,8 +8,8 @@
 
 from docplex.mp.relax_linear import LinearRelaxer
 
-from common import plot
 from plot_kind import PlotKind
+from plot_kind_plotter import plot
 
 class Funcional(PlotKind):
 
