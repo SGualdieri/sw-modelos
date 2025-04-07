@@ -1,5 +1,5 @@
 from plot_kind import PlotKind
-from rhs_iterator import iterate_over_rhs
+from rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
 
 class VM(PlotKind):
@@ -26,7 +26,8 @@ class VM(PlotKind):
     def iterate(self, constraint_nameX, mdl, products, produccion_vars):
         constraint_nameY = mdl.get_constraint_by_name(constraint_nameX)
 
-        self.current_rhs_value, self.rhs_values, self.dual_values = iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, self.get_y)        
+        iterator = RhsIterator()
+        self.current_rhs_value, self.rhs_values, self.dual_values = iterator.iterate_over_rhs(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, self.get_y)        
         
         return self.current_rhs_value, self.rhs_values, self.dual_values
     

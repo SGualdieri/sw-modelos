@@ -1,5 +1,5 @@
 from plot_kind import PlotKind
-from price_iterator import iterate_over_price, solve_model_for_price
+from price_iterator import PriceIterator
 from plot_kind_plotter import plot
 
 class CurvaDeOferta(PlotKind):
@@ -44,11 +44,13 @@ class CurvaDeOferta(PlotKind):
             raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
         
         # Iteramos
-        current_price_value, prices, quantities = iterate_over_price(product_name, prod_var, mdl, products, produccion_vars, self.get_y)
+        iterator = PriceIterator()
+        current_price_value, prices, quantities = iterator.iterate_over_price(product_name, prod_var, mdl, products, produccion_vars, self.get_y)
         
-        # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos    
+        # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
+        # AUX: esto puede ir adentro de iterator []    
         price = 0     
-        _ = solve_model_for_price(product_name, price, mdl, products, produccion_vars)
+        _ = iterator.solve_model_for_price(product_name, price, mdl, products, produccion_vars)
         quantity = self.get_y(prod_var)
         x_values = [price] + prices
         y_values = [quantity] + quantities

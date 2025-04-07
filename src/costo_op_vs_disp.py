@@ -1,5 +1,5 @@
 from plot_kind import PlotKind
-from rhs_iterator import iterate_over_rhs
+from rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
 
 class CostoOportunidad(PlotKind):
@@ -80,8 +80,9 @@ class CostoOportunidad(PlotKind):
                 raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
             get_y_function = self.get_y_without_min_dem
             self._prod_var = prod_var_or_min_dem_constraint # []
-            
-        return iterate_over_rhs(constraint_nameX, prod_var_or_min_dem_constraint, mdl, products, produccion_vars, get_y_function)
+
+        iterator = RhsIterator() # aux: veremos que le pasamos []
+        return iterator.iterate_over_rhs(constraint_nameX, prod_var_or_min_dem_constraint, mdl, products, produccion_vars, get_y_function)
 
 
 
