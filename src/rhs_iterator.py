@@ -1,7 +1,7 @@
 
 from docplex.mp.relax_linear import LinearRelaxer
 
-from common_iterator import iterate_internal
+from common_iterator import Iterator
 
 class RhsIterator():
 
@@ -70,5 +70,6 @@ class RhsIterator():
         # Obtengo punto actual
         current_rhs_value = c.rhs.constant
         current_dual_value = get_y_function(constraint_nameY)
-            
-        return iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # Aux: Volver para revisar gran cant de parámetros.
+        
+        iterator = Iterator()
+        return iterator.iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # Aux: Volver para revisar gran cant de parámetros.

@@ -1,5 +1,5 @@
 from docplex.mp.relax_linear import LinearRelaxer
-from common_iterator import iterate_internal
+from common_iterator import Iterator
 
 def get_prod_var_for(product_name, produccion_vars):
     prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
@@ -65,4 +65,5 @@ class PriceIterator():
         current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(prod_var)
 
-        return iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve_model_for_price) # aux: var mdl, 'm', y funciones.
+        iterator = Iterator()
+        return iterator.iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve_model_for_price) # aux: var mdl, 'm', y funciones.
