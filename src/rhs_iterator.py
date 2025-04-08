@@ -10,7 +10,7 @@ class RhsIterator(Iterator):
     # Aux: la llama la iterate
     # Perform sensitivity analysis of the RHS
     # Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
-    # (produccion_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
+    # (production_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
     # Devuelve límites lower y upper del rango actual, solamente para la constraint especificada.
     def perform_sensitivity_analysis(self, mdl, constraint):
         lp = LinearRelaxer.make_relaxed_model(mdl)
@@ -27,7 +27,6 @@ class RhsIterator(Iterator):
 
     # Adjust RHS and solve 
     ### Aux: misma función que VM, funcional, costo op
-    # mdl, products, produccion_vars
     # A la restriccción de constraint_nameX, le pone el rhs recibido.
     def solve(self, constraint_nameX, rhs_value, mdl):
         print("---")

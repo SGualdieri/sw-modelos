@@ -1,11 +1,11 @@
 from docplex.mp.relax_linear import LinearRelaxer
 from common_iterator import Iterator
 
-def get_prod_var_for(product_name, produccion_vars):
-    prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
+def get_prod_var_for(product_name, production_vars):
+    prod_var = next((value for key, value in production_vars.items() if key[0] == product_name), None)
     
     if prod_var is None:
-        raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
+        raise ValueError(f"ERROR: no se encontró {product_name} en production_vars.")
     return prod_var
 
 class PriceIterator(Iterator):
@@ -53,7 +53,7 @@ class PriceIterator(Iterator):
         
     # aux: ver cantidad de parámetros.
     # pre: se resolvió el modelo y existe solución.
-    #def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function):
+    #def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, production_vars, get_y_function):
     def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):
         PRICE_POSITION_IN_PRODUCTS = 1 # price position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
 

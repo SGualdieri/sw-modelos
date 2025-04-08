@@ -58,8 +58,7 @@ class Iterator(ABC):
         # Devuelvo el current y las listas    
         return current_x_value, x_values, y_values
 
-    # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
-        # aux: cant parámetros...
+    
     def iterate_left(self, lower, mdl, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
@@ -96,10 +95,8 @@ class Iterator(ABC):
             x_coord = new_lower - LITTLE_M
         
         return x_list, y_list
-        
+    
 
-    # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
-        # aux: cant parámetros...
     def iterate_right(self, upper, mdl, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
