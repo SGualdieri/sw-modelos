@@ -4,12 +4,16 @@ from plot_kind_plotter import plot
 
 class CurvaDeOferta(PlotKind):
 
-    def __init__(self):
+    def __init__(self, mdl, products, production_vars):
         super().__init__()
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
         self.current_price_value = None
         self.prices = None
         self.dual_values = None
+
+        self.mdl = mdl
+        self.products = products
+        self.production_vars = production_vars
 
 
     # Get quantity of the product in the solution
@@ -25,8 +29,8 @@ class CurvaDeOferta(PlotKind):
     
     # AUX: will extract pms later, and make these abstract methods as well
     
-    def iterate(self, product_name, mdl, products, produccion_vars):
-        self.current_price_value, self.prices, self.quantities = self.iterate_over_price_for_var(product_name, mdl, products, produccion_vars)
+    def iterate(self, product_name):
+        self.current_price_value, self.prices, self.quantities = self.iterate_over_price_for_var(product_name, self.mdl, self.products, self.production_vars)
         
         return self.current_price_value, self.prices, self.quantities
     

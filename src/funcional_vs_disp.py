@@ -13,12 +13,16 @@ from plot_kind_plotter import plot
 
 class Funcional(PlotKind):
 
-    def __init__(self):
+    def __init__(self, mdl, products, production_vars):
         super().__init__()
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
         self.current_rhs_value = None
         self.rhs_values = None
         self.dual_values = None
+
+        self.mdl = mdl
+        self.products = products
+        self.production_vars = production_vars
 
     def get_y(self, solution):
         """AUX: WILL use this after refactoring"""
@@ -32,8 +36,8 @@ class Funcional(PlotKind):
         return {"xlabel": xlabel, "ylabel": ylabel, "title": title}
 
     
-    def iterate(self, constraint_name, mdl, products, produccion_vars):
-        self.current_rhs_value, self.rhs_values, self.objective_values = iterate_over_rhs(constraint_name, mdl, products, produccion_vars)
+    def iterate(self, constraint_name):
+        self.current_rhs_value, self.rhs_values, self.objective_values = iterate_over_rhs(constraint_name, self.mdl, self.products, self.production_vars)
 
         return self.current_rhs_value, self.rhs_values, self.objective_values # currently returned for debugging purposes
         
