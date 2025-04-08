@@ -14,12 +14,12 @@ class PriceIterator(Iterator):
     # Perform sensitivity analysis of the objective
     # Devuelve el lower y upper del rango actual para el coeficiente del funcional
     # de la variable prod_var.
-    def perform_sensitivity_analysis(self, mdl, prod_name, produccion_vars):
+    def perform_sensitivity_analysis(self, mdl, prod_name):
         lp = LinearRelaxer.make_relaxed_model(mdl)
         lp.solve()
         cpx = lp.get_engine().get_cplex()
         
-        prod_var=get_prod_var_for(prod_name, produccion_vars)
+        prod_var=get_prod_var_for(prod_name, self.production_vars)
 
         idx=prod_var.index
         ranges = cpx.solution.sensitivity.objective()

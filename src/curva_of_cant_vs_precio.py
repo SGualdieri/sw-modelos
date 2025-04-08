@@ -44,7 +44,7 @@ class CurvaDeOferta(PlotKind):
             raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
         
         # Iteramos
-        iterator = PriceIterator()
+        iterator = PriceIterator(products, produccion_vars)
         current_price_value, prices, quantities = iterator.iterate_over_price(product_name, prod_var, mdl, products, produccion_vars, self.get_y)
         
         # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
