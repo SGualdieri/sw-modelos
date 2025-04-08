@@ -32,19 +32,19 @@ class PriceIterator(Iterator):
     # price: price to consider
     # prod_name: product name ("A", "B", "C")
     # Al prod_name le pone el price, y resuelve.
-    def solve(self, prod_name, price, mdl, products, produccion_vars):
+    def solve(self, prod_name, price, mdl):
 
         # Función objetivo
         # Toma los coeficientes de los datos excepto por el de la variable prod_name para la cual considera el coeficiente 'price'
-        total_benefit = mdl.sum(produccion_vars[p] * (p[1] if p[0] != prod_name else price) for p in products)
+        total_benefit = mdl.sum(self.production_vars[p] * (p[1] if p[0] != prod_name else price) for p in self.products)
         mdl.maximize(total_benefit)
 
         solution = mdl.solve()
         if solution is not None:
             print("* Production model solved with objective: {:g}".format(solution.objective_value))
             print("* Total benefit=%g" % solution.objective_value)
-            for p in products:
-                print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p].solution_value))
+            for p in self.products:
+                print("Production of {product}: {prod_var}".format(product=p[0], prod_var=self.production_vars[p].solution_value))
 
             return solution
         else:

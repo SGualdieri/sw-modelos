@@ -8,7 +8,7 @@ from data import LITTLE_M
 class Iterator(ABC):
 
     def __init__(self, products, production_vars):
-        self.products = products,
+        self.products = products
         self.production_vars = production_vars
     
     @abstractmethod
@@ -17,7 +17,7 @@ class Iterator(ABC):
         pass
 
     @abstractmethod
-    def solve(self, constraint_nameX, rhs_value, mdl, products, produccion_vars):
+    def solve(self, constraint_nameX, rhs_value, mdl):
         "Debe ser implementado por cada subclase"
         pass    
 
@@ -71,7 +71,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if x is lower than 0         
         
-            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
@@ -88,7 +88,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if the x_coord is lower than 0                
                 
-            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
@@ -111,7 +111,7 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
@@ -126,7 +126,7 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))

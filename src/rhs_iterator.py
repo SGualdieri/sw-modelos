@@ -29,7 +29,7 @@ class RhsIterator(Iterator):
     ### Aux: misma función que VM, funcional, costo op
     # mdl, products, produccion_vars
     # A la restriccción de constraint_nameX, le pone el rhs recibido.
-    def solve(self, constraint_nameX, rhs_value, mdl, products, produccion_vars):
+    def solve(self, constraint_nameX, rhs_value, mdl):
         print("---")
         # (Operación O(1))
         c = mdl.get_constraint_by_name(constraint_nameX)
@@ -40,12 +40,12 @@ class RhsIterator(Iterator):
         print("- Adjusting RHS to: {0}".format(rhs_value))
         c.rhs = rhs_value
         solution = mdl.solve()
-        
+                
         if solution is not None:       
             print("* Production model solved with objective: {:g}".format(solution.objective_value))
             print("* Total benefit=%g" % solution.objective_value)
-            for p in products:
-                print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p].solution_value))
+            for p in self.products:
+                print("Production of {product}: {prod_var}".format(product=p[0], prod_var=self.production_vars[p].solution_value))
             return solution
         else:
             print("No solution found for RHS value: {0}".format(rhs_value))
