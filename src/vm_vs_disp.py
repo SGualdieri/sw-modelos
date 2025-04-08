@@ -6,8 +6,8 @@ class VM(PlotKind):
     def __init__(self):
         super().__init__()
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
-        self.current_rhs_value = None,
-        self.rhs_values = None,
+        self.current_rhs_value = None
+        self.rhs_values = None
         self.dual_values = None
 
 

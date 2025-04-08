@@ -7,12 +7,12 @@ class CostoOportunidad(PlotKind):
     def __init__(self):
         super().__init__()
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
-        self.current_rhs_value = None,
-        self.rhs_values = None,
-        self.dual_values = None,
+        self.current_rhs_value = None
+        self.rhs_values = None
+        self.dual_values = None
 
-        self._get_y = None,
-        self._min_dem_constraint = None,
+        self._get_y = None
+        self._min_dem_constraint = None
         self._prod_var = None
 
 

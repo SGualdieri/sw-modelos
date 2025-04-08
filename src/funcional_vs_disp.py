@@ -16,8 +16,8 @@ class Funcional(PlotKind):
     def __init__(self):
         super().__init__()
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
-        self.current_rhs_value = None,
-        self.rhs_values = None,
+        self.current_rhs_value = None
+        self.rhs_values = None
         self.dual_values = None
 
     def get_y(self, solution):
@@ -34,7 +34,7 @@ class Funcional(PlotKind):
     
     def iterate(self, constraint_name, mdl, products, produccion_vars):
         self.current_rhs_value, self.rhs_values, self.objective_values = iterate_over_rhs(constraint_name, mdl, products, produccion_vars)
-        
+
         return self.current_rhs_value, self.rhs_values, self.objective_values # currently returned for debugging purposes
         
 
