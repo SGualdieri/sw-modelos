@@ -5,7 +5,8 @@ from plot_kind_plotter import plot
 class CostoOportunidad(PlotKind):
 
     def __init__(self, mdl, products, production_vars):
-        super().__init__()
+        super().__init__(mdl, products, production_vars)
+        
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
         self.current_rhs_value = None
         self.rhs_values = None
@@ -14,11 +15,6 @@ class CostoOportunidad(PlotKind):
         self._get_y = None
         self._min_dem_constraint = None
         self._prod_var = None
-
-        self.mdl = mdl        
-        # Necesarios para más partes en el último método
-        self.products = products
-        self.production_vars = production_vars
 
 
     # A possible implementarion [revisar después, si no conviene un setter privado]

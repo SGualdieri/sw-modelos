@@ -4,14 +4,13 @@ from plot_kind_plotter import plot
 
 class VM(PlotKind):
     def __init__(self, mdl, products, production_vars):
-        super().__init__()
+        super().__init__(mdl, products, production_vars)
+        
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
         self.current_rhs_value = None
         self.rhs_values = None
         self.dual_values = None
-
-        self.mdl = mdl
-        self.iterator = iterator = RhsIterator(products, production_vars)
+        
 
 
     # Obtener la componente 'y' a registrar.
@@ -29,7 +28,8 @@ class VM(PlotKind):
     def iterate(self, constraint_nameX):
         constraint_nameY = self.mdl.get_constraint_by_name(constraint_nameX)
         
-        self.current_rhs_value, self.rhs_values, self.dual_values = self.iterator.iterate_over_rhs(constraint_nameX, constraint_nameY, self.mdl, self.get_y)        
+        iterator = iterator = RhsIterator(self.products, self.production_vars)
+        self.current_rhs_value, self.rhs_values, self.dual_values = iterator.iterate_over_rhs(constraint_nameX, constraint_nameY, self.mdl, self.get_y)        
         
         return self.current_rhs_value, self.rhs_values, self.dual_values
     

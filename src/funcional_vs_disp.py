@@ -14,15 +14,13 @@ from plot_kind_plotter import plot
 class Funcional(PlotKind):
 
     def __init__(self, mdl, products, production_vars):
-        super().__init__()
+        super().__init__(mdl, products, production_vars)
+        
         # Estos tres atributos en el futuro podrían no existir, xq podría haber un método que haga iterate and plot
         self.current_rhs_value = None
         self.rhs_values = None
         self.dual_values = None
 
-        self.mdl = mdl
-        self.products = products
-        self.production_vars = production_vars
 
     def get_y(self, solution):
         """AUX: WILL use this after refactoring"""
