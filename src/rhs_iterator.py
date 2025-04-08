@@ -71,4 +71,4 @@ class RhsIterator(Iterator):
         current_rhs_value = c.rhs.constant
         current_dual_value = get_y_function(constraint_nameY)
         
-        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # Aux: Volver para revisar gran cant de parámetros.
+        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function) # Aux: Volver para revisar gran cant de parámetros.

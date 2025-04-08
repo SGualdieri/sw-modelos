@@ -22,18 +22,18 @@ class Iterator(ABC):
     #   current_* se registran en los resultados en el orden correcto
     #   mdl, products, produccion_vars son necesarias para resolver el modelo y para encontrar variables
     #   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
-    def iterate_internal(self, constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, products, produccion_vars, get_y_function, perform_function, solve_function):
+    def iterate_internal(self, constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, products, produccion_vars, get_y_function):
         # Inicializo listas para acumular los resultados
         x_values = [] # rhs values or prices
         y_values = [] # dual value or quantities
         
         # Obtengo lower y upper iniciales
-        initial_lower, initial_upper = perform_function(mdl, constraint_nameX, produccion_vars)
+        initial_lower, initial_upper = self.perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
         print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
         # Guardo puntos hacia atrás
         #Decrease x_coord starting from lower bound - m
-        left_x_list, left_y_list = self.iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
+        left_x_list, left_y_list = self.iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
         x_values.extend(reversed(left_x_list))
         y_values.extend(reversed(left_y_list))
 
@@ -47,7 +47,7 @@ class Iterator(ABC):
         
         # Guardo puntos hacia adelante
         # Increase x_coord starting from upper bound + m
-        right_x_list, right_y_list = self.iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function)
+        right_x_list, right_y_list = self.iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
         x_values.extend(right_x_list)
         y_values.extend(right_y_list)
         
@@ -56,7 +56,7 @@ class Iterator(ABC):
 
     # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
         # aux: cant parámetros...
-    def iterate_left(self, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+    def iterate_left(self, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
 
@@ -67,7 +67,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if x is lower than 0         
         
-            solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
@@ -75,7 +75,7 @@ class Iterator(ABC):
                 self.store(x_list, y_list, x_coord + LITTLE_M, get_y_function(constraint_nameY))
                 
             # Perform sensitivity analysis to get the new lower bound
-            new_lower, _ = perform_function(mdl, constraint_nameX, produccion_vars)
+            new_lower, _ = self.perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
             #print("[debug] sensitivity", new_sensitivity)            
             # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
             #     if c_new_sens.name == constraint_nameX:
@@ -84,7 +84,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if the x_coord is lower than 0                
                 
-            solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
@@ -96,7 +96,7 @@ class Iterator(ABC):
 
     # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
         # aux: cant parámetros...
-    def iterate_right(self, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function, perform_function, solve_function):
+    def iterate_right(self, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
 
@@ -107,14 +107,14 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
                 self.store(x_list, y_list, x_coord-LITTLE_M, get_y_function(constraint_nameY))
 
             # Perform sensitivity analysis to get the new upper bound
-            _, new_upper = perform_function(mdl, constraint_nameX, produccion_vars)
+            _, new_upper = self.perform_sensitivity_analysis(mdl, constraint_nameX, produccion_vars)
             # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
             #     if c_new_sens.name == constraint_nameX:
             
@@ -122,7 +122,7 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = solve_function(constraint_nameX, x_coord, mdl, products, produccion_vars)
+            solution = self.solve(constraint_nameX, x_coord, mdl, products, produccion_vars)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))

@@ -65,4 +65,4 @@ class PriceIterator(Iterator):
         current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(prod_var)
 
-        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function, self.perform_sensitivity_analysis, self.solve) # aux: var mdl, 'm', y funciones.
+        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function) # aux: var mdl, 'm', y funciones.
