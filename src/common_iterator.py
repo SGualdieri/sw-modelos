@@ -24,9 +24,9 @@ class Iterator(ABC):
     # Función genérica, llamada desde wrappers.
     #   constraint_nameX, constraint_nameY
     #   current_* se registran en los resultados en el orden correcto
-    #   mdl, products, produccion_vars son necesarias para resolver el modelo y para encontrar variables
+    #   mdl necesario para resolver el modelo y para encontrar variables
     #   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
-    def iterate_internal(self, constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, products, produccion_vars, get_y_function):
+    def iterate_internal(self, constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, get_y_function):
         # Inicializo listas para acumular los resultados
         x_values = [] # rhs values or prices
         y_values = [] # dual value or quantities
@@ -37,7 +37,7 @@ class Iterator(ABC):
 
         # Guardo puntos hacia atrás
         #Decrease x_coord starting from lower bound - m
-        left_x_list, left_y_list = self.iterate_left(initial_lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
+        left_x_list, left_y_list = self.iterate_left(initial_lower, mdl, constraint_nameX, constraint_nameY, get_y_function)
         x_values.extend(reversed(left_x_list))
         y_values.extend(reversed(left_y_list))
 
@@ -51,7 +51,7 @@ class Iterator(ABC):
         
         # Guardo puntos hacia adelante
         # Increase x_coord starting from upper bound + m
-        right_x_list, right_y_list = self.iterate_right(initial_upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function)
+        right_x_list, right_y_list = self.iterate_right(initial_upper, mdl, constraint_nameX, constraint_nameY, get_y_function)
         x_values.extend(right_x_list)
         y_values.extend(right_y_list)
         
@@ -60,7 +60,7 @@ class Iterator(ABC):
 
     # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
         # aux: cant parámetros...
-    def iterate_left(self, lower, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
+    def iterate_left(self, lower, mdl, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
 
@@ -100,7 +100,7 @@ class Iterator(ABC):
 
     # aux: mdl, products, produccion_vars, constraint_nameX, constraint_nameY, report_function
         # aux: cant parámetros...
-    def iterate_right(self, upper, mdl, products, produccion_vars, constraint_nameX, constraint_nameY, get_y_function):
+    def iterate_right(self, upper, mdl, constraint_nameX, constraint_nameY, get_y_function):
         x_list = []
         y_list = []
 

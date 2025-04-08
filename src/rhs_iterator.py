@@ -40,7 +40,7 @@ class RhsIterator(Iterator):
         print("- Adjusting RHS to: {0}".format(rhs_value))
         c.rhs = rhs_value
         solution = mdl.solve()
-                
+
         if solution is not None:       
             print("* Production model solved with objective: {:g}".format(solution.objective_value))
             print("* Total benefit=%g" % solution.objective_value)
@@ -53,7 +53,7 @@ class RhsIterator(Iterator):
 
     # aux: ver cantidad de parámetros.
     # pre: se resolvió el modelo y existe solución.
-    def iterate_over_rhs(self, constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
+    def iterate_over_rhs(self, constraint_nameX, constraint_nameY, mdl, get_y_function):
 
         c = mdl.get_constraint_by_name(constraint_nameX)
         if c is None:
@@ -71,4 +71,4 @@ class RhsIterator(Iterator):
         current_rhs_value = c.rhs.constant
         current_dual_value = get_y_function(constraint_nameY)
         
-        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, products, produccion_vars, get_y_function) # Aux: Volver para revisar gran cant de parámetros.
+        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, get_y_function)

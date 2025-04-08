@@ -82,7 +82,7 @@ class CostoOportunidad(PlotKind):
             self._prod_var = prod_var_or_min_dem_constraint # []
 
         iterator = RhsIterator(products, produccion_vars)
-        return iterator.iterate_over_rhs(constraint_nameX, prod_var_or_min_dem_constraint, mdl, products, produccion_vars, get_y_function)
+        return iterator.iterate_over_rhs(constraint_nameX, prod_var_or_min_dem_constraint, mdl, get_y_function)
 
 
 

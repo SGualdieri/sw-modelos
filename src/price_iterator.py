@@ -53,16 +53,16 @@ class PriceIterator(Iterator):
         
     # aux: ver cantidad de parámetros.
     # pre: se resolvió el modelo y existe solución.
-    #def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
-    def iterate_over_price(self, prod_name, prod_var, mdl, products, produccion_vars, get_y_function): # aux: var mdl, 'm', y funciones.
+    #def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, produccion_vars, get_y_function):
+    def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):
         PRICE_POSITION_IN_PRODUCTS = 1 # price position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
 
         # Obtengo punto actual
         # Obs: Esto, a diferencia la iteración para otros gráficos (rhs) No requiere llamar a perform_sensitivity_analysis.
         # Buscamos el product_name en el array "products" para consultar en su primera posición su precio
         # (aux: products tiene tuplas, esto obtiene la tupla que tiene 'product_name' como primer valor)
-        idx = next((i for i, prod in enumerate(products) if prod[0] == prod_name), None)
-        current_price_value = products[idx][PRICE_POSITION_IN_PRODUCTS]
+        idx = next((i for i, prod in enumerate(self.products) if prod[0] == prod_name), None)
+        current_price_value = self.products[idx][PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(prod_var)
 
-        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, products, produccion_vars, get_y_function) # aux: var mdl, 'm', y funciones.
+        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, get_y_function)

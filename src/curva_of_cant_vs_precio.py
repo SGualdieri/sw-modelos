@@ -45,7 +45,7 @@ class CurvaDeOferta(PlotKind):
         
         # Iteramos
         iterator = PriceIterator(products, produccion_vars)
-        current_price_value, prices, quantities = iterator.iterate_over_price(product_name, prod_var, mdl, products, produccion_vars, self.get_y)
+        current_price_value, prices, quantities = iterator.iterate_over_price(product_name, prod_var, mdl, self.get_y)
         
         # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
         # AUX: esto puede ir adentro de iterator []    
