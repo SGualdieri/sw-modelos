@@ -1,3 +1,4 @@
+from data_related_utils import get_constraint_by_name
 from plot_kind import PlotKind
 from rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
@@ -26,7 +27,7 @@ class VM(PlotKind):
 
     # AUX: En construcción. También debería ser abstracto en superclase, viendo firmas y atributos (self).
     def iterate(self, constraint_nameX):
-        constraint_nameY = self.mdl.get_constraint_by_name(constraint_nameX)
+        constraint_nameY = get_constraint_by_name(constraint_nameX, self.mdl)
         
         iterator = RhsIterator(self.products, self.production_vars, constraint_nameX, constraint_nameY)
         self.current_rhs_value, self.rhs_values, self.dual_values = iterator.iterate_over_rhs(constraint_nameX, constraint_nameY, self.mdl, self.get_y)        

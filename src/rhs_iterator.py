@@ -2,12 +2,9 @@
 from docplex.mp.relax_linear import LinearRelaxer
 
 from common_iterator import Iterator
+from data_related_utils import get_constraint_by_name
 
-def get_constraint_by_name(constraint_nameX, mdl):
-    constraint_nameY = mdl.get_constraint_by_name(constraint_nameX)
-    if constraint_nameY is None: 
-        raise ValueError(f"ERROR: no se encontró la restricción: {constraint_nameX}.")
-    return constraint_nameY
+
 
 class RhsIterator(Iterator):
 

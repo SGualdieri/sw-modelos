@@ -8,6 +8,7 @@
 
 from docplex.mp.relax_linear import LinearRelaxer
 
+from data_related_utils import get_constraint_by_name
 from plot_kind import PlotKind
 from plot_kind_plotter import plot
 
@@ -98,7 +99,7 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
 
 # Iterate over RHS (from 0 to infinity) starting from current RHS value
 def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
-    c = mdl.get_constraint_by_name(constraint_name)
+    c = get_constraint_by_name(constraint_name, mdl)
     if c is None:
         print("Constraint with name '{0}' not found.".format(constraint_name))
         return

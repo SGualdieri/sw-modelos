@@ -1,6 +1,6 @@
 from docplex.mp.relax_linear import LinearRelaxer
 from common_iterator import Iterator
-from data_related_utils import get_prod_var_for
+from data_related_utils import PRICE_POSITION_IN_PRODUCTS, get_prod_var_for, get_product_element_from_products
 
 class PriceIterator(Iterator):
 
@@ -51,15 +51,14 @@ class PriceIterator(Iterator):
             return None  # Return None to indicate that the model is infeasible at this point
         
     # Pre: se resolvió el modelo y existe solución.
-    def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):
-        PRICE_POSITION_IN_PRODUCTS = 1 # price position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
+    def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):        
 
         # Obtengo punto actual
         # Obs: Esto, a diferencia la iteración para otros gráficos (rhs) No requiere llamar a perform_sensitivity_analysis.
         # Buscamos el product_name en el array "products" para consultar en su primera posición su precio
         # (aux: products tiene tuplas, esto obtiene la tupla que tiene 'product_name' como primer valor)
-        idx = next((i for i, prod in enumerate(self.products) if prod[0] == self.prod_name), None)
-        current_price_value = self.products[idx][PRICE_POSITION_IN_PRODUCTS]
+        prod_element = get_product_element_from_products(self.prod_name, self.products)
+        current_price_value = prod_element[PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(self.prod_var)
 
         return super().iterate_internal(self.prod_name, self.prod_var, current_price_value, current_quantity_value, mdl, get_y_function)

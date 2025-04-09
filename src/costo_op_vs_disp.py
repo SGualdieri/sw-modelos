@@ -1,4 +1,4 @@
-from data_related_utils import get_min_dem_constraint_for, get_prod_var_for
+from data_related_utils import DEM_MIN_POSITION, get_min_dem_constraint_for, get_prod_var_for, get_product_element_from_products
 from plot_kind import PlotKind
 from rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
@@ -57,16 +57,11 @@ class CostoOportunidad(PlotKind):
     # y le indica a iterate_over_rhs cuál de los dos valores se desea obtener al iterar.
     def iterate_over_rhs_checking_prod_min_dem(self, constraint_nameX, product_name, products, production_vars, mdl):
         # Buscamos el product_name en el array "products" para consultar en su tercera posición si el mismo tiene demanda mínima
-        # (aux: products tiene tuplas, esto obtiene la tupla que tiene 'product_name' como primer valor)
-        idx = next((i for i, prod in enumerate(products) if prod[0] == product_name), None)
-        if idx is None:
-            raise ValueError(f"ERROR: no se encontró el product_name: {product_name} en el array products.")
+        prod_element = get_product_element_from_products(product_name, products)
 
         # Obtenemos la restricción (a la que tomarle el dual_value) si el producto tiene demanda mínima
-        # o la variable del producto en caso contrario (al que tomarle el reduced_cost), para llamar a iterar
-        DEM_MIN_POSITION = 3 # position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
-        
-        dem_min = products[idx][DEM_MIN_POSITION] > 0
+        # o la variable del producto en caso contrario (al que tomarle el reduced_cost), para llamar a iterar            
+        dem_min = prod_element[DEM_MIN_POSITION] > 0
         if dem_min:
             print(f"Demanda mínima encontrada para el producto {product_name}.")            
             prod_var_or_min_dem_constraint = get_min_dem_constraint_for(product_name, mdl)

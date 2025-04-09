@@ -55,7 +55,7 @@ class Iterator(ABC):
         x_values.extend(right_x_list)
         y_values.extend(right_y_list)
         
-        # Devuelvo el current y las listas    
+        # Devuelvo el current y las listas
         return current_x_value, x_values, y_values
 
     
