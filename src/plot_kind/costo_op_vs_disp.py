@@ -1,5 +1,5 @@
 from data_related_utils import DEM_MIN_POSITION, get_min_dem_constraint_for, get_prod_var_for, get_product_element_from_products
-from .plot_kind import PlotKind # El punto es porque el archivo tiene el mismo nombre que la carpeta
+from .plot_kind import PlotKind # El punto es para indicar que nos referimos al archivo de ese nombre, dentro de esta misma carpeta
 from iterators.rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
 

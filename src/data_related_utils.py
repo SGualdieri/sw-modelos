@@ -1,8 +1,15 @@
 
+### Aviso ###
+### Este archivo contiene funciones que sirven para obtener variables del mdl necesarias para iterar y hacer gráficos.
+### Esto No se modifica con solo un cambio de números en los datos de entrada.
+### Solo cambia cuando cambia el formato en que están las production_vars (ej subíndice "DemandMin_") y el array de products.
+
+LITTLE_M = 0.01
 
 
-# Aux: esto podría estar en otro lado, hay varias funciones de este estilo,
-#      que ya tengan mdl, products, production_Vars y encapsulen estas cosas.
+### Aux: Esto podría ser una clase que reciba mdl, products, production_vars y encapsule el acceso los arrays,
+# los plot_kind e iterators podrían incluso recibir una instancia de esto en lugar de esas tres variables por separado.
+# Es solo para [ver] en el futuro.
 
 ##############################################
 ### RELACIONADAS CON MDL Y PRODUCTION_VARS ###

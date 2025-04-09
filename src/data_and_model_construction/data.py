@@ -1,6 +1,4 @@
 
-LITTLE_M = 0.01
-
 def create_data_dict():
     # human friendly problem name
     name = "guia5problematipo2"
@@ -12,7 +10,7 @@ def create_data_dict():
                 ("B", 40, 120, 80),
                 ("C", 30, 999999999999999, 0)]
 
-    # resources are a list of simple tuples (name, capacity)
+    # resources are ast of simple tuples (name, capacity)
     resources = [("Equipo1", 160),
                 ("Equipo2", 180),
                 ("Equipo3", 110)] ### Aux: orig, así estaba
