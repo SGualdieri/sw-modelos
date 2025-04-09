@@ -1,5 +1,5 @@
 from data_related_utils import get_constraint_by_name
-from plot_kind import PlotKind
+from .plot_kind import PlotKind
 from rhs_iterator import RhsIterator
 from plot_kind_plotter import plot
 

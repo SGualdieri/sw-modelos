@@ -9,7 +9,7 @@
 from docplex.mp.relax_linear import LinearRelaxer
 
 from data_related_utils import get_constraint_by_name
-from plot_kind import PlotKind
+from .plot_kind import PlotKind
 from plot_kind_plotter import plot
 
 class Funcional(PlotKind):
