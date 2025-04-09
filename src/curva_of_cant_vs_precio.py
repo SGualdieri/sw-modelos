@@ -1,3 +1,4 @@
+from data_related_utils import get_prod_var_for
 from plot_kind import PlotKind
 from price_iterator import PriceIterator
 from plot_kind_plotter import plot
@@ -37,21 +38,16 @@ class CurvaDeOferta(PlotKind):
     
     #################################
 
-    def iterate_over_price_for_var(self, product_name, mdl, products, produccion_vars):
-        # esto da, por ejemplo prod_var_or_min_dem_constraint=list(produccion_vars.values())[0] ## "A"
-        prod_var = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
-        #print(f"[debug] prod_var: {prod_var}")
-        if prod_var is None:
-            raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
-        
+    def iterate_over_price_for_var(self, product_name, mdl, products, production_vars):
+        prod_var = get_prod_var_for(product_name, production_vars)
         # Iteramos
-        iterator = PriceIterator(products, produccion_vars)
-        current_price_value, prices, quantities = iterator.iterate_over_price(product_name, prod_var, mdl, self.get_y)
+        iterator = PriceIterator(product_name, products, production_vars)
+        current_price_value, prices, quantities = iterator.iterate_over_price(mdl, self.get_y)
         
         # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
         # AUX: esto puede ir adentro de iterator []    
         price = 0     
-        _ = iterator.solve(product_name, price, mdl)
+        _ = iterator.solve(price, mdl)
         quantity = self.get_y(prod_var)
         x_values = [price] + prices
         y_values = [quantity] + quantities
