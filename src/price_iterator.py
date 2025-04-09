@@ -10,6 +10,13 @@ def get_prod_var_for(product_name, production_vars):
 
 class PriceIterator(Iterator):
 
+    def __init__(self, prod_name, products, production_vars):
+        super().__init__(products, production_vars)
+
+        self.prod_name = prod_name
+        self.prod_var = get_prod_var_for(prod_name, production_vars)
+    
+
     # Aux: específica de Curva de oferta
     # Perform sensitivity analysis of the objective
     # Devuelve el lower y upper del rango actual para el coeficiente del funcional
@@ -18,10 +25,8 @@ class PriceIterator(Iterator):
         lp = LinearRelaxer.make_relaxed_model(mdl)
         lp.solve()
         cpx = lp.get_engine().get_cplex()
-        
-        prod_var=get_prod_var_for(prod_name, self.production_vars)
 
-        idx=prod_var.index
+        idx=self.prod_var.index
         ranges = cpx.solution.sensitivity.objective()
         #print("[debug] lower, upper:", ranges[idx])
 
@@ -36,7 +41,7 @@ class PriceIterator(Iterator):
 
         # Función objetivo
         # Toma los coeficientes de los datos excepto por el de la variable prod_name para la cual considera el coeficiente 'price'
-        total_benefit = mdl.sum(self.production_vars[p] * (p[1] if p[0] != prod_name else price) for p in self.products)
+        total_benefit = mdl.sum(self.production_vars[p] * (p[1] if p[0] != self.prod_name else price) for p in self.products)
         mdl.maximize(total_benefit)
 
         solution = mdl.solve()
@@ -61,8 +66,8 @@ class PriceIterator(Iterator):
         # Obs: Esto, a diferencia la iteración para otros gráficos (rhs) No requiere llamar a perform_sensitivity_analysis.
         # Buscamos el product_name en el array "products" para consultar en su primera posición su precio
         # (aux: products tiene tuplas, esto obtiene la tupla que tiene 'product_name' como primer valor)
-        idx = next((i for i, prod in enumerate(self.products) if prod[0] == prod_name), None)
+        idx = next((i for i, prod in enumerate(self.products) if prod[0] == self.prod_name), None)
         current_price_value = self.products[idx][PRICE_POSITION_IN_PRODUCTS]
-        current_quantity_value = get_y_function(prod_var)
+        current_quantity_value = get_y_function(self.prod_var)
 
-        return super().iterate_internal(prod_name, prod_var, current_price_value, current_quantity_value, mdl, get_y_function)
+        return super().iterate_internal(self.prod_name, self.prod_var, current_price_value, current_quantity_value, mdl, get_y_function)
