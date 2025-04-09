@@ -1,12 +1,6 @@
 from docplex.mp.relax_linear import LinearRelaxer
 from common_iterator import Iterator
-
-def get_prod_var_for(product_name, production_vars):
-    prod_var = next((value for key, value in production_vars.items() if key[0] == product_name), None)
-    
-    if prod_var is None:
-        raise ValueError(f"ERROR: no se encontró {product_name} en production_vars.")
-    return prod_var
+from data_related_utils import get_prod_var_for
 
 class PriceIterator(Iterator):
 
