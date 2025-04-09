@@ -25,7 +25,7 @@ class Iterator(ABC):
     #   constraint_nameX, constraint_nameY
     #   current_* se registran en los resultados en el orden correcto
     #   mdl necesario para resolver el modelo y para encontrar variables
-    #   get_y_function, perform_function, solve_function son funciones específicas de cada tipo de gráfico,
+    #   get_y_function es la función específicas de cada tipo de gráfico para obtener el valor de "y" (ej el .dual_value, o el .reduced_cost, etc),
     def iterate_internal(self, constraint_nameX, constraint_nameY, current_x_value, current_y_value, mdl, get_y_function):
         # Inicializo listas para acumular los resultados
         x_values = [] # rhs values or prices

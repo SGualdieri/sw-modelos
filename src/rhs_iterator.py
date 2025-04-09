@@ -19,10 +19,6 @@ class RhsIterator(Iterator):
 
     #... def __init__(self, mdl, products, production_vars, constraint_nameX, prod_var=None):    
         
-
-    ### Versión nueva, VM y costo op (que usan este iterate+perform)
-    ### Aux: VM, costo op, Funcional
-    # Aux: la llama la iterate
     # Perform sensitivity analysis of the RHS
     # Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
     # (production_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
@@ -41,7 +37,6 @@ class RhsIterator(Iterator):
         return rhs[idx]
 
     # Adjust RHS and solve 
-    ### Aux: misma función que VM, funcional, costo op
     # A la restriccción de constraint_nameX, le pone el rhs recibido.
     def solve(self, constraint_nameX, rhs_value, mdl):
         print("---")
@@ -62,24 +57,21 @@ class RhsIterator(Iterator):
             print("No solution found for RHS value: {0}".format(rhs_value))
             return None  # Return None to indicate that the model is infeasible at this point
 
-    # aux: ver cantidad de parámetros.
-    # pre: se resolvió el modelo y existe solución.
+    # Pre: se resolvió el modelo y existe solución.
     def iterate_over_rhs(self, constraint_nameX, constraint_nameY, mdl, get_y_function):
 
-        c = mdl.get_constraint_by_name(constraint_nameX)
-        if c is None:
-            print("Constraint with name '{0}' not found.".format(constraint_nameX))
-            return
+        c = get_constraint_by_name(self.constraint_nameX, mdl)        
         
         # Hago esto acá afuera, porque la obtención del punto actual depende de 'c' y el mismo
         # debe agregarse a la lista en el momento dado (entre lower y upper iniciales).
 
         # Obtengo lower y upper iniciales
-        _initial_lower, _initial_upper = self.perform_sensitivity_analysis(mdl, constraint_nameX)
+        _initial_lower, _initial_upper = self.perform_sensitivity_analysis(mdl, self.constraint_nameX)
         #print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
         
         # Obtengo punto actual
         current_rhs_value = c.rhs.constant
-        current_dual_value = get_y_function(constraint_nameY)
+        current_dual_value = get_y_function(self.constraint_nameY)
         
-        return super().iterate_internal(constraint_nameX, constraint_nameY, current_rhs_value, current_dual_value, mdl, get_y_function)
+        return super().iterate_internal(self.constraint_nameX, self.constraint_nameY, current_rhs_value, current_dual_value, mdl, get_y_function)
+        # (Aux: podría usar los self.c_nX y c_nY en lugar de recibirlos).

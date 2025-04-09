@@ -56,9 +56,7 @@ class PriceIterator(Iterator):
             print("No solution found for price value: {0}".format(price))
             return None  # Return None to indicate that the model is infeasible at this point
         
-    # aux: ver cantidad de parámetros.
-    # pre: se resolvió el modelo y existe solución.
-    #def iterate_over_price(constraint_nameX, constraint_nameY, mdl, products, production_vars, get_y_function):
+    # Pre: se resolvió el modelo y existe solución.
     def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):
         PRICE_POSITION_IN_PRODUCTS = 1 # price position in products vector (0=name, 1=benefit, 2=max demand, 3=min demand)
 
