@@ -24,7 +24,7 @@ class CostoOportunidad(PlotKind):
             return -1 * self._min_dem_constraint.dual_value
         else:
             return -1 * self._prod_var.reduced_cost
-    
+        
     def get_text_for_plot(self, constraint_nameX, product_name, xunit, yunit):
         xlabel='{0} {1}'.format(constraint_nameX, xunit)
         ylabel='C. Oport \nprod min {}\n{}'.format(yunit, product_name)
@@ -67,26 +67,35 @@ class CostoOportunidad(PlotKind):
         
         dem_min = products[idx][DEM_MIN_POSITION] > 0
         if dem_min:
-            print(f"Demanda mínima encontrada para el producto {product_name}.")
-            constraint_nameY = f"DemandMin_{product_name}"
-            prod_var_or_min_dem_constraint = mdl.get_constraint_by_name(constraint_nameY)
+            print(f"Demanda mínima encontrada para el producto {product_name}.")            
+            prod_var_or_min_dem_constraint = get_min_dem_constraint_for(product_name, mdl)
             get_y_function = self.get_y_with_min_dem
             self._min_dem_constraint = prod_var_or_min_dem_constraint # [] esto se va a mejorar con el refactor de los iterators
         else:
             print(f"Demanda mínima No encontrada para el producto {product_name}.")
-            # esto da, por ejemplo prod_var_or_min_dem_constraint=list(produccion_vars.values())[0] ## "A"
-            # Aux: es necesario que la key sea una tupla? Sería mucho más simple / legible si la key fuera directamente "A"
-            prod_var_or_min_dem_constraint = next((value for key, value in produccion_vars.items() if key[0] == product_name), None)
-            if prod_var_or_min_dem_constraint is None:
-                raise ValueError(f"ERROR: no se encontró {product_name} en produccion_vars.")
+            prod_var_or_min_dem_constraint = get_prod_var_for(product_name, produccion_vars)
             get_y_function = self.get_y_without_min_dem
             self._prod_var = prod_var_or_min_dem_constraint # []
 
-        iterator = RhsIterator(products, produccion_vars)
+        iterator = RhsIterator(products, produccion_vars, constraint_nameX, prod_var_or_min_dem_constraint)
         return iterator.iterate_over_rhs(constraint_nameX, prod_var_or_min_dem_constraint, mdl, get_y_function)
 
 
+# Aux: esto podría estar en otro lado, hay varias funciones de este estilo,
+#      que ya tengan mdl, products, production_Vars y encapsulen estas cosas.
+# Notar que es la obtención 'cruzada', es obt constraint_nameY pero no a partir de constraint_nameX sino de prod_NAME.
+def get_min_dem_constraint_for(prod_name, mdl):
+    constraint_nameY = f"DemandMin_{prod_name}"
+    min_dem_constraint = mdl.get_constraint_by_name(constraint_nameY)
+    return min_dem_constraint
 
+def get_prod_var_for(prod_name, production_vars):
+    # esto da, por ejemplo prod_var_or_min_dem_constraint=list(produccion_vars.values())[0] ## "A"
+    # Aux: es necesario que la key sea una tupla? Sería mucho más simple / legible si la key fuera directamente "A"
+    prod_var = next((value for key, value in production_vars.items() if key[0] == prod_name), None)
+    if prod_var is None:
+        raise ValueError(f"ERROR: no se encontró {prod_name} en produccion_vars.")
+    return prod_var
 
 # Comentarios de debug, entreiterate y plot
 # print("rhs_values", rhs_values)

@@ -3,7 +3,22 @@ from docplex.mp.relax_linear import LinearRelaxer
 
 from common_iterator import Iterator
 
+def get_constraint_by_name(constraint_nameX, mdl):
+    constraint_nameY = mdl.get_constraint_by_name(constraint_nameX)
+    if constraint_nameY is None: 
+        raise ValueError(f"ERROR: no se encontró la restricción: {constraint_nameX}.")
+    return constraint_nameY
+
 class RhsIterator(Iterator):
+
+    def __init__(self, products, production_vars, constraint_nameX, prod_var_or_min_dem_constraint):
+        super().__init__(products, production_vars)
+        self.constraint_nameX = constraint_nameX
+        self.constraint_nameY = prod_var_or_min_dem_constraint
+
+
+    #... def __init__(self, mdl, products, production_vars, constraint_nameX, prod_var=None):    
+        
 
     ### Versión nueva, VM y costo op (que usan este iterate+perform)
     ### Aux: VM, costo op, Funcional
@@ -20,7 +35,7 @@ class RhsIterator(Iterator):
         rhs=cpx.solution.sensitivity.rhs()
         names = cpx.linear_constraints.get_names()
         #print("[DEBUG] NOMBRES DE LAS RESTRICCIONES:\n", names)
-        idx=names.index(constraint)#.name)
+        idx=names.index(self.constraint_nameX)#.name)
         #print(f"[debug] Lower y upper para restr: {constraint}: {rhs[idx]}")
         
         return rhs[idx]
@@ -30,13 +45,10 @@ class RhsIterator(Iterator):
     # A la restriccción de constraint_nameX, le pone el rhs recibido.
     def solve(self, constraint_nameX, rhs_value, mdl):
         print("---")
-        # (Operación O(1))
-        c = mdl.get_constraint_by_name(constraint_nameX)
-        if c is None:
-            print("Constraint with name '{0}' not found.".format(constraint_nameX))
-            return
+        c = get_constraint_by_name(self.constraint_nameX, mdl)
         
         print("- Adjusting RHS to: {0}".format(rhs_value))
+        # aux: para reemplazar esta línea con "c" por "self.constraint_nameY.rhs = rhs_value" hay que tener cuidado [].
         c.rhs = rhs_value
         solution = mdl.solve()
 

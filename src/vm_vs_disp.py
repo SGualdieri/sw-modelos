@@ -28,7 +28,7 @@ class VM(PlotKind):
     def iterate(self, constraint_nameX):
         constraint_nameY = self.mdl.get_constraint_by_name(constraint_nameX)
         
-        iterator = iterator = RhsIterator(self.products, self.production_vars)
+        iterator = RhsIterator(self.products, self.production_vars, constraint_nameX, constraint_nameY)
         self.current_rhs_value, self.rhs_values, self.dual_values = iterator.iterate_over_rhs(constraint_nameX, constraint_nameY, self.mdl, self.get_y)        
         
         return self.current_rhs_value, self.rhs_values, self.dual_values
