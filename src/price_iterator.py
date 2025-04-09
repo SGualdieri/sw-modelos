@@ -15,7 +15,7 @@ class PriceIterator(Iterator):
     # Perform sensitivity analysis of the objective
     # Devuelve el lower y upper del rango actual para el coeficiente del funcional
     # de la variable prod_var.
-    def perform_sensitivity_analysis(self, mdl, prod_name):
+    def perform_sensitivity_analysis(self, mdl):
         lp = LinearRelaxer.make_relaxed_model(mdl)
         lp.solve()
         cpx = lp.get_engine().get_cplex()
@@ -30,8 +30,8 @@ class PriceIterator(Iterator):
     # Solves the model for a given price por a product
     # price: price to consider
     # prod_name: product name ("A", "B", "C")
-    # Al prod_name le pone el price, y resuelve.
-    def solve(self, prod_name, price, mdl):
+    # Al prod_name le pone el price recibido, y resuelve.
+    def solve(self, price, mdl):
 
         # Función objetivo
         # Toma los coeficientes de los datos excepto por el de la variable prod_name para la cual considera el coeficiente 'price'
@@ -51,7 +51,8 @@ class PriceIterator(Iterator):
             return None  # Return None to indicate that the model is infeasible at this point
         
     # Pre: se resolvió el modelo y existe solución.
-    def iterate_over_price(self, prod_name, prod_var, mdl, get_y_function):        
+    # Itera sobre el valor de price del producto de nombre prod_name.
+    def iterate_over_price(self, mdl, get_y_function):
 
         # Obtengo punto actual
         # Obs: Esto, a diferencia la iteración para otros gráficos (rhs) No requiere llamar a perform_sensitivity_analysis.

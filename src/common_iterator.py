@@ -12,12 +12,12 @@ class Iterator(ABC):
         self.production_vars = production_vars
     
     @abstractmethod
-    def perform_sensitivity_analysis(self, mdl, constraint):
+    def perform_sensitivity_analysis(self, mdl):
         "Debe ser implementado por cada subclase"
         pass
 
     @abstractmethod
-    def solve(self, constraint_nameX, rhs_value, mdl):
+    def solve(self, value_to_be_set, mdl):
         "Debe ser implementado por cada subclase"
         pass    
 
@@ -32,7 +32,7 @@ class Iterator(ABC):
         y_values = [] # dual value or quantities
         
         # Obtengo lower y upper iniciales
-        initial_lower, initial_upper = self.perform_sensitivity_analysis(mdl, constraint_nameX)
+        initial_lower, initial_upper = self.perform_sensitivity_analysis(mdl)
         print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
 
         # Guardo puntos hacia atrás
@@ -70,7 +70,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if x is lower than 0         
         
-            solution = self.solve(constraint_nameX, x_coord, mdl)
+            solution = self.solve(x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
@@ -78,7 +78,7 @@ class Iterator(ABC):
                 self.store(x_list, y_list, x_coord + LITTLE_M, get_y_function(constraint_nameY))
                 
             # Perform sensitivity analysis to get the new lower bound
-            new_lower, _ = self.perform_sensitivity_analysis(mdl, constraint_nameX)
+            new_lower, _ = self.perform_sensitivity_analysis(mdl)
             #print("[debug] sensitivity", new_sensitivity)            
             # for c_new_sens, (new_lower, _) in zip(mdl.iter_constraints(), new_sensitivity):
             #     if c_new_sens.name == constraint_nameX:
@@ -87,7 +87,7 @@ class Iterator(ABC):
             if x_coord < 0:
                 break ## Stop if the x_coord is lower than 0                
                 
-            solution = self.solve(constraint_nameX, x_coord, mdl)
+            solution = self.solve(x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))
@@ -108,14 +108,14 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = self.solve(constraint_nameX, x_coord, mdl)
+            solution = self.solve(x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             else:
                 self.store(x_list, y_list, x_coord-LITTLE_M, get_y_function(constraint_nameY))
 
             # Perform sensitivity analysis to get the new upper bound
-            _, new_upper = self.perform_sensitivity_analysis(mdl, constraint_nameX)
+            _, new_upper = self.perform_sensitivity_analysis(mdl)
             # for c_new_sens, (_, new_upper) in zip(mdl.iter_constraints(), new_sensitivity):
             #     if c_new_sens.name == constraint_nameX:
             
@@ -123,7 +123,7 @@ class Iterator(ABC):
             if x_coord >= mdl.infinity:
                 break ## Stop if the x_coord reaches or exceeds 'infinity'
 
-            solution = self.solve(constraint_nameX, x_coord, mdl)
+            solution = self.solve(x_coord, mdl)
             if solution is None:
                 break  # Stop if the model is infeasible
             self.store(x_list, y_list, x_coord, get_y_function(constraint_nameY))

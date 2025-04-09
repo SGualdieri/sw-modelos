@@ -20,7 +20,7 @@ class RhsIterator(Iterator):
     # Constraint es el nombre de la restricción cuyos lower y upper bounds queremos obtener,
     # (production_vars se mantiene actualmente solo por compatibilidad, refactorizable en el futuro).
     # Devuelve límites lower y upper del rango actual, solamente para la constraint especificada.
-    def perform_sensitivity_analysis(self, mdl, constraint):
+    def perform_sensitivity_analysis(self, mdl):
         lp = LinearRelaxer.make_relaxed_model(mdl)
         lp.solve()
         cpx = lp.get_engine().get_cplex()
@@ -34,8 +34,8 @@ class RhsIterator(Iterator):
         return rhs[idx]
 
     # Adjust RHS and solve 
-    # A la restriccción de constraint_nameX, le pone el rhs recibido.
-    def solve(self, constraint_nameX, rhs_value, mdl):
+    # A la restriccción de constraint_nameX, le pone el rhs recibido, y resuelve.
+    def solve(self, rhs_value, mdl):
         print("---")
         c = get_constraint_by_name(self.constraint_nameX, mdl)
         
@@ -55,7 +55,8 @@ class RhsIterator(Iterator):
             return None  # Return None to indicate that the model is infeasible at this point
 
     # Pre: se resolvió el modelo y existe solución.
-    def iterate_over_rhs(self, constraint_nameX, constraint_nameY, mdl, get_y_function):
+    # Itera sobre el rhs de la restricción constraint_nameX.
+    def iterate_over_rhs(self, mdl, get_y_function):
 
         c = get_constraint_by_name(self.constraint_nameX, mdl)        
         
@@ -63,7 +64,7 @@ class RhsIterator(Iterator):
         # debe agregarse a la lista en el momento dado (entre lower y upper iniciales).
 
         # Obtengo lower y upper iniciales
-        _initial_lower, _initial_upper = self.perform_sensitivity_analysis(mdl, self.constraint_nameX)
+        _initial_lower, _initial_upper = self.perform_sensitivity_analysis(mdl)
         #print("[debug] (lower, upper):", (initial_lower, initial_upper)) 
         
         # Obtengo punto actual
