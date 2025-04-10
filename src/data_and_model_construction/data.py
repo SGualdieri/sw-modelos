@@ -1,4 +1,7 @@
 
+from data_related_utils import BIG_M
+
+
 def create_data_dict():
     # human friendly problem name
     name = "guia5problematipo2"
@@ -8,7 +11,7 @@ def create_data_dict():
     ###products = [("A", 10, 100, 0), # aux probando
     #products = [("A", 70, 100, 0), # aux probando
                 ("B", 40, 120, 80),
-                ("C", 30, 999999999999999, 0)]
+                ("C", 30, BIG_M, 0)]
 
     # resources are ast of simple tuples (name, capacity)
     resources = [("Equipo1", 160),

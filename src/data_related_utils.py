@@ -5,7 +5,7 @@
 ### Solo cambia cuando cambia el formato en que están las production_vars (ej subíndice "DemandMin_") y el array de products.
 
 LITTLE_M = 0.01
-
+BIG_M = 999999999999999
 
 ### Aux: Esto podría ser una clase que reciba mdl, products, production_vars y encapsule el acceso los arrays,
 # los plot_kind e iterators podrían incluso recibir una instancia de esto en lugar de esas tres variables por separado.
