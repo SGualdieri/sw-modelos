@@ -3,7 +3,7 @@ import sys
 from docplex.mp.model import Model
 
 #def load_data():
-from data import unpack_data
+from .data import unpack_data
 
 # Create the model with constraints and objective
 def create_model(data_dict):

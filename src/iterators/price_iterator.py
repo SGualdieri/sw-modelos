@@ -1,5 +1,5 @@
 from docplex.mp.relax_linear import LinearRelaxer
-from common_iterator import Iterator
+from .common_iterator import Iterator
 from data_related_utils import PRICE_POSITION_IN_PRODUCTS, get_prod_var_for, get_product_element_from_products
 
 class PriceIterator(Iterator):

@@ -1,6 +1,6 @@
 from data_related_utils import get_prod_var_for
-from plot_kind import PlotKind
-from price_iterator import PriceIterator
+from .plot_kind import PlotKind
+from iterators.price_iterator import PriceIterator
 from plot_kind_plotter import plot
 
 class CurvaDeOferta(PlotKind):

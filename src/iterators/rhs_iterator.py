@@ -1,7 +1,7 @@
 
 from docplex.mp.relax_linear import LinearRelaxer
 
-from common_iterator import Iterator
+from .common_iterator import Iterator
 from data_related_utils import get_constraint_by_name
 
 

@@ -3,7 +3,7 @@
 ###################
 
 from abc import ABC, abstractmethod
-from data import LITTLE_M
+from data_related_utils import LITTLE_M
 
 class Iterator(ABC):
 
