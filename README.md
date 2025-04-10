@@ -10,10 +10,10 @@ Luego de haber descargado e instalado `ILOG CPLEX Optimization Studio` de la pá
 
 - Identificar la, llamémosla "carpeta_base", en la que se instaló ibm cplex
   Para verificar, la carpeta es la que contiene a:
-```
+   ```
     concert  cpoptimizer  license  python       swidtag
-	  cplex    doc          opl      README.html  Uninstall
-```
+    cplex    doc          opl      README.html  Uninstall
+   ```
   Copiarse la ruta a la carpeta base, incluyendo a la carpeta_base. Llamémosla "ruta_base".
   (ej ruta_base: /home/al/otras_posibles_carpetas/[carpeta_base])
 
