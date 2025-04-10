@@ -14,18 +14,10 @@ def create_model(data_dict):
     mdl = Model(name)
     
     prod_names = [prod[0] for prod in products]
-    production_vars = mdl.continuous_var_dict(prod_names, name=prod_names)#, key_format="%s")
+    production_vars = mdl.continuous_var_dict(prod_names, name=prod_names)
 
-    # Debug
-    # print(f"products: {products}")
-    # print(f"prod_names: {prod_names}")
-    # print(f"production_vars: {production_vars}")
-    # print(f"resources: {resources}")
-    # print(f"consumptions: {consumptions}")
-    # print(f"")
-    # print(f"production_vars['A']: {production_vars['A']}")
     # --- constraints ---
-
+    # IMPORTANT: KEEP this format and naming convention, if you'll want to use plot_kind/* later (VM, CostoOp, etc).
     # resources disp equipo and consumptions
     mdl.add_constraints((mdl.sum(production_vars[p[0]] * consumptions[res[0]][products.index(p)] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
 
@@ -43,6 +35,7 @@ def create_model(data_dict):
     # --- set the objective ---
     mdl.maximize(total_benefit)
 
+    # IMPORTANT: KEEP these three variables, if you'll want to use plot_kind/* later.
     return mdl, production_vars, products
 
 # Print model human friendly name, restrictions and objective.
