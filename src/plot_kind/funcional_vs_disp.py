@@ -90,7 +90,7 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
         print("* Production model solved with objective: {:g}".format(solution.objective_value))
         print("* Total benefit=%g" % solution.objective_value)
         for p in products:
-            print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p].solution_value))
+            print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p[0]].solution_value))
         return solution
     else:
         print("No solution found for RHS value: {0}".format(rhs_value))
