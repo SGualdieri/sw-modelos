@@ -78,9 +78,9 @@ def perform_sensitivity_analysis(mdl):
 
 # Adjust RHS and solve 
 ### Aux: misma función que VM, funcional, costo op
-  # mdl, products, produccion_vars
+  # mdl, products, production_vars
   # A la restriccción de constraint_nameX, le pone el rhs recibido.
-def solve(c, rhs_value, mdl, products, produccion_vars):
+def solve(c, rhs_value, mdl, products, production_vars):
     print("---")    
     print("- Adjusting RHS to: {0}".format(rhs_value))
     c.rhs = rhs_value
@@ -90,7 +90,7 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
         print("* Production model solved with objective: {:g}".format(solution.objective_value))
         print("* Total benefit=%g" % solution.objective_value)
         for p in products:
-            print("Production of {product}: {prod_var}".format(product=p[0], prod_var=produccion_vars[p].solution_value))
+            print("Production of {product}: {prod_var}".format(product=p[0], prod_var=production_vars[p[0]].solution_value))
         return solution
     else:
         print("No solution found for RHS value: {0}".format(rhs_value))
@@ -98,7 +98,7 @@ def solve(c, rhs_value, mdl, products, produccion_vars):
 
 
 # Iterate over RHS (from 0 to infinity) starting from current RHS value
-def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
+def iterate_over_rhs(constraint_name, mdl, products, production_vars):
     c = get_constraint_by_name(constraint_name, mdl)
     if c is None:
         print("Constraint with name '{0}' not found.".format(constraint_name))
@@ -118,13 +118,13 @@ def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
             # *********Store and report the initial lower and upper bounds for the chart*********
             print("---Initial lower bound: {0}".format(lower))
             rhs = lower
-            solution = solve(c, rhs, mdl, products, produccion_vars)
+            solution = solve(c, rhs, mdl, products, production_vars)
             if solution is not None:
                 report(rhs, mdl.objective_value)
 
             print("---Initial upper bound: {0}".format(upper))
             rhs = upper
-            solution = solve(c, rhs, mdl, products, produccion_vars)
+            solution = solve(c, rhs, mdl, products, production_vars)
             if solution is not None and rhs < mdl.infinity:
                 report(rhs, mdl.objective_value)
             # ********* End of lower and upper bounds *********
@@ -136,7 +136,7 @@ def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
                 if rhs < 0:
                     break ## Stop if the rhs is lower than 0                
                 
-                solution = solve(c, rhs, mdl, products, produccion_vars)#+m) # aux: no son escalones, un "m" afecta al Z # TEMP # Da Timeout
+                solution = solve(c, rhs, mdl, products, production_vars)#+m) # aux: no son escalones, un "m" afecta al Z # TEMP # Da Timeout
                                         # claro, siempre obtengo el mismo rango xq me quedé en el inicial si
                                         # le vuevo a sumar el m que le resté, #ja.
                 if solution is None:
@@ -151,7 +151,7 @@ def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
                         if rhs < 0:
                             break ## Stop if the rhs is lower than 0                
                             
-                        solution = solve(c, rhs, mdl, products, produccion_vars)
+                        solution = solve(c, rhs, mdl, products, production_vars)
                         if solution is None:
                             break  # Stop if the model is infeasible
                         report(c_new_sens.rhs.constant, mdl.objective_value)
@@ -168,7 +168,7 @@ def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
                 if rhs >= mdl.infinity:
                     break ## Stop if the rhs reaches or exceeds infinity
 
-                solution = solve(c, rhs, mdl, products, produccion_vars)#-m) # aux: no son escalones, un "m" afecta al Z # TEMP
+                solution = solve(c, rhs, mdl, products, production_vars)#-m) # aux: no son escalones, un "m" afecta al Z # TEMP
                 if solution is None:
                     break  # Stop if the model is infeasible
 
@@ -181,7 +181,7 @@ def iterate_over_rhs(constraint_name, mdl, products, produccion_vars):
                         if rhs >= mdl.infinity:
                             break ## Stop if the rhs reaches or exceeds infinity
 
-                        solution = solve(c, rhs, mdl, products, produccion_vars)
+                        solution = solve(c, rhs, mdl, products, production_vars)
                         if solution is None:
                             break  # Stop if the model is infeasible
                         report(c_new_sens.rhs.constant, mdl.objective_value)
