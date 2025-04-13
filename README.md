@@ -1,5 +1,43 @@
+# Descargar este código
+Para descargar el código se puede utilizar o bien git, o bien la interfaz de github.
+
+### Opción 1: usar git, por línea de comandos
+  - Crear una carpeta, en cualquier ubicación preferida.
+    Por ejemplo, dentro de `/home/al/fiuba/1c2025/modelos`, crear la carpeta `repo-modelos/`.
+    **Todos los comandos siguientes (de esta sección y de las demás secciones) deben ejecutarse desde dentro de esa nueva carpeta `repo-modelos/`.**
+  
+  - Entrar a la nueva carpeta.
+    - Se puede abrir un IDE (recomendado). Desde sus menúes elegir `Abrir carpeta` o similar y elegir esta nueva carpeta `repo-modelos/`. Desde sus menúes también se puede abrir un `Nuevo terminal` que abrirá ya dentro de esa misma carpeta.
+  
+    - Si no se quiere utilizar un IDE, se puede abrir una terminal, navegar hasta la carpeta en cuestión (en el ejemplo `cd /home/al/fiuba/1c2025/modelos/repo-modelos/`). Se recomienda usar un IDE.
+  
+  **Con esto se abrió una terminal (sea con o sin IDE) en la nueva carpeta. En dicha terminal, que ya tiene abierta la carpeta correcta, ejecutar los siguientes comandos (de esta sección y de las demás secciones).**
+  
+  - Clonar el repositorio
+    `git clone git@github.com:Aldy09/sw-modelos
+.git .`
+    Esto clona el repositorio, en la carpeta `repo-modelos/`.
+  - Traer los últimos cambios (esto es útil para más adelante cuando haya que traer cambios nuevos, actualmente solo informará que Ya está actualizado)
+    `git pull`
+    
+    El código ha sido descargado. Continuar con la siguiente sección.
+
+### Opción 2: interfaz gráfica de Github
+  - Clickear el botón verde llamado `<> Code` y luego la opción `Download ZIP`.
+    Guardarlo en cualquier ubicación preferida, por ejemplo dentro de `/home/al/fiuba/1c2025/modelos`.
+    Dar botón derecho al archivo y `Extraer` (o procedimiento necesario para extraer el .zip).
+    Eso genererá una nueva carpeta llamada `sw-modelos-main/`. 
+    
+    **Todos los comandos siguientes (de esta sección y de las demás secciones) deben ejecutarse desde dentro de esa nueva carpeta `sw-modelos-main/`.**
+    
+    - Se puede abrir un IDE (recomendado). Desde sus menúes elegir `Abrir carpeta` o similar y elegir esta nueva carpeta `sw-modelos-main/`. Desde sus menúes también se puede abrir un `Nuevo terminal` que abrirá ya dentro de esa misma carpeta.
+  
+    - Si no se quiere utilizar un IDE, se puede abrir una terminal, navegar hasta la carpeta en cuestión (en el ejemplo `cd /home/al/fiuba/1c2025/modelos/sw-modelos-main/`). Se recomienda usar un IDE.
+  
+  **Con esto se abrió una terminal (sea con o sin IDE) en la nueva carpeta. En dicha terminal, que ya tiene abierta la carpeta correcta, ejecutar los comandos de las secciones siguientes.**
+
 # Instalar dependencias y configurar filtro git
-Luego de haber descargado e instalado `ILOG CPLEX Optimization Studio` de la página oficial de IBM, seguir estos pasos.
+Luego de haber descargado e instalado `ILOG CPLEX Optimization Studio` de la página oficial de IBM, y de haber terminado de ejecutar la sección `Descargar este código`, seguir estos pasos.
 
 - Crear un entorno python:
 
