@@ -13,29 +13,35 @@ def create_model(data_dict):
     name, products, resources, consumptions = unpack_data(data_dict)
     mdl = Model(name)
     
+    # Crear variables de producción, de acuerdo con los productos
     prod_names = [prod[0] for prod in products]
     production_vars = mdl.continuous_var_dict(prod_names, name=prod_names)
 
-    # --- constraints ---
-    # IMPORTANT: KEEP this format and naming convention, if you'll want to use plot_kind/* later (VM, CostoOp, etc).
-    # resources disp equipo and consumptions
-    mdl.add_constraints((mdl.sum(production_vars[p[0]] * consumptions[res[0]][products.index(p)] for p in products) <= res[1], 'Disp_%s' % res[0]) for res in resources)
-
-    # max demand
-    mdl.add_constraints((production_vars[p[0]] <= p[2], 'DemandMax_%s' % p[0]) for p in products)
-
-    # min demand
-    mdl.add_constraints((production_vars[p[0]] >= p[3], 'DemandMin_%s' % p[0]) for p in products)
-
-    # --- print information ---
-    mdl.print_information()
-
+    # --- Función objetivo ---
     total_benefit = mdl.sum(production_vars[p[0]] * p[1] for p in products)
-
-    # --- set the objective ---
     mdl.maximize(total_benefit)
 
-    # IMPORTANT: KEEP these three variables, if you'll want to use plot_kind/* later.
+    # --- Restricciones ---
+
+    # Disponibilidad de lana
+    mdl.add_constraint(1.6 * production_vars['A'] + 1.2 * production_vars['C'] <= 20, 'LanaMejoradaDisp')
+    mdl.add_constraint(1.8 * production_vars['B'] <= 36, 'LanaNormalDisp')
+
+    # Relación de productos tipo B
+    mdl.add_constraint(production_vars['B'] == production_vars['B1'] + production_vars['B2'], 'RelB')
+
+    # Restricciones de disponibilidad de máquinas
+    mdl.add_constraint(5 * production_vars['A'] + 6 * production_vars['B1'] <= 80, 'MaquinasDisp1')
+    mdl.add_constraint(4 * production_vars['B2'] + 4 * production_vars['C'] <= 80, 'MaquinasDisp2')
+
+    # Restricciones de demanda máxima y mínima
+    mdl.add_constraints((production_vars[p[0]] <= p[2], 'DemandMax_%s' % p[0]) for p in products)
+    mdl.add_constraints((production_vars[p[0]] >= p[3], 'DemandMin_%s' % p[0]) for p in products)
+
+    # --- Mostrar la información del modelo ---
+    mdl.print_information()
+
+    # --- Retornar modelo y variables ---
     return mdl, production_vars, products
 
 # Print model human friendly name, restrictions and objective.

@@ -3,23 +3,29 @@ from data_related_utils import BIG_M
 
 def create_data_dict():
     # human friendly problem name
-    name = "guia5problematipo2"
+    name = "produccion_pullover"
 
     # name, benefit, max demand, min demand
     # IMPORTANT: KEEP this format, if you'll want to use plot_kind/* later.
-    products = [("A", 50, 100, 0),
-                ("B", 40, 120, 80),
-                ("C", 30, BIG_M, 0)]
+    products = [("A", 10, BIG_M, 0),
+                ("B", 15, BIG_M, 10),
+                ("B1", 0, BIG_M, 0),  
+                ("B2", 0, BIG_M, 0),
+                ("C", 18, BIG_M, 0)]
+
 
     # resources are ast of simple tuples (name, capacity)
-    resources = [("Equipo1", 160),
-                ("Equipo2", 180),
-                ("Equipo3", 110)]
+    resources = [("Maquina I", 80),
+                 ("Maquina II", 80),
+                 ("Lana Mejorada", 20),
+                 ("Lana Normal", 36)]
+
     
     consumptions = {
-        "Equipo1": (0.8, 0.8, 0.3),  # ex 0.8*A + 0.8*B + 0.3*C
-        "Equipo2": (0.6, 1.2, 0),    # Consumptions for Equipo2
-        "Equipo3": (0.6, 1, 0.6)     # Consumptions for Equipo3
+        "Maquina I": (5, 6, 0, 0),    # A y B1 consumen Maquina I
+        "Maquina II": (0, 4, 4, 0),   # B2 y C consumen Maquina II
+        "Lana Mejorada": (1.6, 0, 1.2, 0),  # A y C consumen Lana Mejorada
+        "Lana Normal": (0, 1.8, 0, 0) # B consume Lana Normal
     }
 
     return {"name": name, "products": products, "resources": resources, "consumptions": consumptions}
