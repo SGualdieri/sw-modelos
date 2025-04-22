@@ -81,4 +81,3 @@ class RhsIterator(Iterator):
         self.reestablish_initial_value(current_rhs_value, mdl)
         
         return iteration_results
-        # (Aux: podría usar los self.c_nX y c_nY en lugar de recibirlos).
