@@ -54,6 +54,10 @@ class RhsIterator(Iterator):
             print("No solution found for RHS value: {0}".format(rhs_value))
             return None  # Return None to indicate that the model is infeasible at this point
 
+    # Deja el mdl como estaba antes de ser modificado por el proceso de iteración.
+    def reestablish_initial_value(self, current_rhs_value, mdl):
+        self.solve(current_rhs_value, mdl)
+
     # Pre: se resolvió el modelo y existe solución.
     # Itera sobre el rhs de la restricción constraint_nameX.
     def iterate_over_rhs(self, mdl, get_y_function):
@@ -70,6 +74,10 @@ class RhsIterator(Iterator):
         # Obtengo punto actual
         current_rhs_value = c.rhs.constant
         current_dual_value = get_y_function(self.constraint_nameY)
+
+        iteration_results = super().iterate_internal(self.constraint_nameX, self.constraint_nameY, current_rhs_value, current_dual_value, mdl, get_y_function)
+
+        # Restablezco el valor original, que fue modificado por solve durante la iteración
+        self.reestablish_initial_value(current_rhs_value, mdl)
         
-        return super().iterate_internal(self.constraint_nameX, self.constraint_nameY, current_rhs_value, current_dual_value, mdl, get_y_function)
-        # (Aux: podría usar los self.c_nX y c_nY en lugar de recibirlos).
+        return iteration_results

@@ -16,6 +16,7 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
     # Set default font size for all text elements
     plt.rcParams.update({'font.size': 18})
     WIDTH=6
+    #plt.figure(figsize=(20, 10)) # si se desea usar, debe ir acá arriba, antes de que plt.otras_cosas dibujen sobre la figura
     
     if is_function_discontinuous:
         # Dibujar líneas horizontales entre x y x+1, con valor y
@@ -61,5 +62,4 @@ def plot(x_values, y_values, current_x_value, text, is_function_discontinuous=Tr
     # Mostrar yticks desde el 0, por claridad
     plt.ylim(bottom=-1)         
 
-    plt.figure(figsize=(20, 10))
     plt.show()

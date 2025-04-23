@@ -36,6 +36,10 @@ class Funcional(PlotKind):
 
     
     def iterate(self, constraint_name):
+        # Aux, inicializaciones de listas solo necesarias acá hasta que se refactorice
+        rhs_values.clear()
+        objective_values.clear()
+
         self.current_rhs_value, self.rhs_values, self.objective_values = iterate_over_rhs(constraint_name, self.mdl, self.products, self.production_vars)
 
         return self.current_rhs_value, self.rhs_values, self.objective_values # currently returned for debugging purposes
@@ -189,8 +193,16 @@ def iterate_over_rhs(constraint_name, mdl, products, production_vars):
                         rhs = new_upper + m
 
                         break
+
+    # Restablezco el valor original, que fue modificado por solve durante la iteración
+    reestablish_initial_value(c, real_rhs_value, mdl, products, production_vars)
                     
     return real_rhs_value, rhs_values, objective_values
+
+# Restablezco el valor original, que fue modificado por solve durante la iteración
+# Aux: Esto está acá temporalmente, hasta que se refactorice este archivo, xq actualmente no usa el rhs_iterator.
+def reestablish_initial_value(c, real_rhs_value, mdl, products, production_vars):
+    _ = solve(c, real_rhs_value, mdl, products, production_vars)
 
 # Llamar a esta función es necesario, dsp de llamar a iterate
 # y antes de llamar a plot, porque estamos usando la versión anterior

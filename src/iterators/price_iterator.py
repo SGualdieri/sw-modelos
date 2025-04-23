@@ -49,7 +49,19 @@ class PriceIterator(Iterator):
         else:
             print("No solution found for price value: {0}".format(price))
             return None  # Return None to indicate that the model is infeasible at this point
-        
+    
+    # Deja el mdl como estaba antes de ser modificado por el proceso de iteración.
+    def reestablish_initial_value(self, current_price_value, mdl):
+        self.solve(current_price_value, mdl)
+    
+    def add_zero_point_at_the_beginning(self, mdl, prices, quantities, get_y):
+        # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
+        price = 0     
+        _ = self.solve(price, mdl)
+        quantity = get_y(self.prod_var)
+        x_values = [price] + prices
+        y_values = [quantity] + quantities
+        return x_values, y_values
     # Pre: se resolvió el modelo y existe solución.
     # Itera sobre el valor de price del producto de nombre prod_name.
     def iterate_over_price(self, mdl, get_y_function):
@@ -62,4 +74,14 @@ class PriceIterator(Iterator):
         current_price_value = prod_element[PRICE_POSITION_IN_PRODUCTS]
         current_quantity_value = get_y_function(self.prod_var)
 
-        return super().iterate_internal(self.prod_name, self.prod_var, current_price_value, current_quantity_value, mdl, get_y_function)
+        current_price_value, prices, quantities = super().iterate_internal(self.prod_name, self.prod_var, current_price_value, current_quantity_value, mdl, get_y_function)
+
+        # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
+        updated_prices, updated_quantities = self.add_zero_point_at_the_beginning(mdl, prices, quantities, get_y_function)
+
+        # Restablezco el valor original, que fue modificado por solve durante la iteración
+        self.reestablish_initial_value(current_price_value, mdl)
+
+        return current_price_value, updated_prices, updated_quantities
+    
+    
