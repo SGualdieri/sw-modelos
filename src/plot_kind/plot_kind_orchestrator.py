@@ -16,7 +16,7 @@ class PlotKindOrchestrator:
         vm.plot(constraint_nameX, x_unit, y_unit)
         return current_rhs_value, rhs_values, dual_values #
     
-    def costo_oportunidad(self, constraint_nameX, product_name, x_unit, y_unit):
+    def costo_oportunidad(self, product_name, constraint_nameX, x_unit, y_unit):
         costo_op = CostoOportunidad(self.mdl, self.products, self.production_vars)
         current_rhs_value, rhs_values, dual_values = costo_op.iterate(constraint_nameX, product_name)
         costo_op.plot(constraint_nameX, product_name, x_unit, y_unit)
