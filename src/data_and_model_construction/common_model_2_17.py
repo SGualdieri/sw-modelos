@@ -1,116 +1,112 @@
-# Import libs
-import sys
+# common_model.py
+
 from docplex.mp.model import Model
 from docplex.mp.constants import ComparisonType
-
-from data_related_utils import BIG_M
-
-#def load_data():
 from .data_2_17 import unpack_data
 
-
 def create_model(data_dict):
-    name, dias, tareas, eficiencia, products, resources, consumptions = unpack_data(data_dict)
-    
-    tareas_cap = set(p[0].split('_')[0] for p in products)
-    tareas = list(tareas_cap) 
+    (
+        name, empleados, tareas, dias,
+        eficiencia, demanda, jornada_horas,
+        costo_diario, bonificacion
+    ) = unpack_data(data_dict)
+
     mdl = Model(name)
 
-    prod_names = [p[0] for p in products]
-    productos_dict = {p[0]: p for p in products}
+    # --- VARIABLES ---
+    x = mdl.binary_var_cube(empleados, tareas, dias, name="x")
+    trabaja = mdl.binary_var_matrix(empleados, dias, name="trabaja")
+    cambia = mdl.binary_var_matrix(empleados, dias[1:], name="cambia")
 
-    trabajadores = {}
-    x = {}
+    # Nueva variable auxiliar para linealizar eficiencia bonificada
+    z = {
+        (e, t, d): mdl.binary_var(name=f"z_{e}_{t}_{d}")
+        for e in empleados for t in tareas for d in dias[1:]
+    }
 
+    # --- RESTRICCIONES ---
+
+    # 1 tarea por empleado por día
+    for e in empleados:
+        for d in dias:
+            mdl.add_constraint(mdl.sum(x[e, t, d] for t in tareas) <= 1, f"una_tarea_{e}_{d}")
+
+    # trabajar si tiene alguna tarea
+    for e in empleados:
+        for d in dias:
+            mdl.add_constraint(mdl.sum(x[e, t, d] for t in tareas) == trabaja[e, d], f"trabaja_{e}_{d}")
+
+    # detectar cambio de tarea
+    for e in empleados:
+        for i in range(1, len(dias)):
+            d = dias[i]
+            d_ant = dias[i - 1]
+            for t1 in tareas:
+                for t2 in tareas:
+                    if t1 != t2:
+                        mdl.add_constraint(
+                            cambia[e, d] >= x[e, t1, d_ant] + x[e, t2, d] - 1,
+                            f"cambio_{e}_{d}_{t1}_{t2}"
+                        )
+
+    # Linealización de bonificación: z[e,t,d] = x[e,t,d] AND cambia[e,d]
+    for e in empleados:
+        for d in dias[1:]:
+            for t in tareas:
+                mdl.add_constraint(z[e, t, d] <= x[e, t, d], f"z1_{e}_{t}_{d}")
+                mdl.add_constraint(z[e, t, d] <= cambia[e, d], f"z2_{e}_{t}_{d}")
+                mdl.add_constraint(z[e, t, d] >= x[e, t, d] + cambia[e, d] - 1, f"z3_{e}_{t}_{d}")
+
+    # cubrir demanda diaria por tarea
     for d in dias:
         for t in tareas:
-            var_name = f"{t.capitalize()}_{d}"
-            if var_name in prod_names:
-                if d == "viernes":
-                    trabajadores[var_name] = mdl.integer_var(name=f"trab_{var_name}")
-                else:
-                    for t_ant in tareas:
-                        x[(t, d, t_ant)] = mdl.integer_var(name=f"x_{t}_{d}_de_{t_ant}")
-
-    for d in dias:
-        for t in tareas:
-            var_name = f"{t.capitalize()}_{d}"
-            if var_name in prod_names and d != "viernes":
-                trabajadores[var_name] = mdl.sum(x[(t, d, t_ant)] for t_ant in tareas)
-
-    for d in dias:
-        for t in tareas:
-            p_name = f"{t.capitalize()}_{d}"
-            if p_name not in prod_names:
+            if (t, d) not in demanda:
                 continue
+            demanda_t_d = demanda[(t, d)]
 
-            eff = eficiencia[t.lower()]
-            if d == "viernes":
-                produccion = trabajadores[p_name] * eff * 8
+            if d == dias[0]:  # viernes
+                eficiencia_total = mdl.sum(
+                    x[e, t, d] * eficiencia[t] * jornada_horas
+                    for e in empleados
+                )
             else:
-                produccion = mdl.sum(
-                    x[(t, d, t_ant)] * (eff * 1.1 * 8 if t != t_ant else eff * 8)
-                    for t_ant in tareas
+                eficiencia_total = mdl.sum(
+                    eficiencia[t] * jornada_horas * (x[e, t, d] + bonificacion * z[e, t, d])
+                    for e in empleados
                 )
 
-            _, _, dmax, dmin = productos_dict[p_name]
-            mdl.add_constraint(produccion >= dmin, f"DemMin_{p_name}")
-            if dmax != BIG_M:
-                mdl.add_constraint(produccion <= dmax, f"DemMax_{p_name}")
+            mdl.add_constraint(eficiencia_total >= demanda_t_d, f"demanda_{t}_{d}")
 
-    for d in dias:
-        tareas_dia = [f"{t}_{d}" for t in tareas if f"{t}_{d}" in trabajadores]
-        suma_trab = mdl.sum(trabajadores[t] for t in tareas_dia)
-        mdl.add_constraint(suma_trab <= 18, f"Limite_{d}")
+    # --- OBJETIVO ---
+    total_costo = mdl.sum(trabaja[e, d] * costo_diario for e in empleados for d in dias)
+    mdl.minimize(total_costo)
+    mdl.print_information()
 
-    costo_total = mdl.sum(trabajadores[p[0]] * 12 for p in products if p[0] in trabajadores)
-    mdl.minimize(costo_total)
+    return mdl, x, trabaja, cambia
 
-    return mdl, trabajadores, products
-
-
-# Print model human friendly name, restrictions and objective.
-# Do not print restrictions such as ">=0" nor "<= inf".
 def print_model(mdl):
-
     print("--------------------")
     print(f"Model: {mdl.name}")
-
     print("Constraints:")
-
-    # Print all constraints, except for ">= 0" and "<= inf"
     for constraint in mdl.iter_constraints():
-        # Only attemp to get rhs if constraint has that attr
-        # (there exist other constraint types that do not have it)
         if hasattr(constraint, "rhs"):
-           
-            # This way of comparing is the only way that works (not "!=", do not attemp "==")
-            le_to_inf = constraint.rhs.equals(BIG_M) and constraint.sense == ComparisonType.LE
-            if le_to_inf: # ignore "<= inf"
-                continue
-            
+            le_to_inf = constraint.rhs.equals(float('inf')) and constraint.sense == ComparisonType.LE
             ge_to_zero = constraint.sense == ComparisonType.GE and constraint.rhs.equals(0)
-            if ge_to_zero: # ignore ">= 0"
+            if le_to_inf or ge_to_zero:
                 continue
-
             print(f"   {constraint}")
-
     print(f"Objective: {mdl.objective_expr}")
     print(f" {mdl.objective_sense.name}")
-    
     print("--------------------")
 
-# Solve the model
-def solve_model(mdl, production_vars, products):
+def solve_model(mdl, x, trabaja, cambia):
     solution = mdl.solve()
 
     if not solution:
-        print("Model cannot be solved.")
-        sys.exit(1)
+        print("❌ No se pudo resolver el modelo.")
+        return
 
-    obj = mdl.objective_value
-
-    print("* Production model solved with objective: {:g}".format(obj))
-    print("* Total benefit=%g" % mdl.objective_value)
-    for p in products:
-        print("Production of {product}: {prod_var}".format(product=p[0], prod_var=production_vars[p[0]].solution_value))
+    print(f"\n✅ Costo total mínimo: ${mdl.objective_value}\n")
+    for (e, t, d), var in x.items():
+        if var.solution_value > 0.5:
+            print(f"🧑 Empleado {e} hace tarea '{t}' el {d}")

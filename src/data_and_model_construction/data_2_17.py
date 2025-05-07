@@ -1,69 +1,59 @@
-from data_related_utils import BIG_M
+# data.py
 
 def create_data_dict():
-    name = "supermercado_3dias"
+    name = "asignacion_empleados_supermercado"
 
-    dias = ["viernes", "sabado", "domingo"]
-    tareas = ["reponer", "ordenar", "marcar"]
+    empleados = list(range(18))
+
+    tareas = ["Reponer", "Ordenar", "Marcar"]
+
+    dias = ["Viernes", "Sabado", "Domingo"]
 
     eficiencia = {
-        "reponer": 15,
-        "ordenar": 30,
-        "marcar": 35
+        "Reponer": 15,
+        "Ordenar": 30,
+        "Marcar": 35
     }
 
-    products = [
-        ("Reponer_viernes", 12, BIG_M, 400),
-        ("Ordenar_viernes", 12, BIG_M, 300),
-        ("Marcar_viernes", 12, BIG_M, 150),
-        ("Reponer_sabado", 12, BIG_M, 500),
-        ("Marcar_sabado", 12, BIG_M, 139),
-        ("Reponer_domingo", 12, BIG_M, 350),
-        ("Ordenar_domingo", 12, BIG_M, 300),
-        ("Marcar_domingo", 12, BIG_M, 143)
-    ]
-
-    resources = [
-        ("Trabajadores_viernes", 18),
-        ("Trabajadores_sabado", 18),
-        ("Trabajadores_domingo", 18)
-    ]
-
-    consumptions = {
-        "Trabajadores_viernes": {
-            "Reponer_viernes": 1 / (15 * 8),
-            "Ordenar_viernes": 1 / (30 * 8),
-            "Marcar_viernes": 1 / (35 * 8),
-        },
-        "Trabajadores_sabado": {
-            "Reponer_sabado": 1 / (15 * 8),
-            "Marcar_sabado": 1 / (35 * 8),
-        },
-        "Trabajadores_domingo": {
-            "Reponer_domingo": 1 / (15 * 8),
-            "Ordenar_domingo": 1 / (30 * 8),
-            "Marcar_domingo": 1 / (35 * 8),
-        }
+    demanda = {
+        ("Reponer", "Viernes"): 500, #uso la misma cantidad que el sabado
+        ("Reponer", "Sabado"): 350,
+        ("Reponer", "Domingo"): 450,
+        ("Ordenar", "Viernes"): 300,
+        ("Ordenar", "Domingo"): 300, #uso lo mismo que el viernes
+        ("Marcar", "Viernes"): 150,
+        ("Marcar", "Sabado"): 139,
+        ("Marcar", "Domingo"): 143,
     }
+
+    jornada_horas = 8
+    costo_diario = 12
+    bonificacion_por_cambio = 0.10
 
     return {
         "name": name,
-        "dias": dias,
+        "empleados": empleados,
         "tareas": tareas,
+        "dias": dias,
         "eficiencia": eficiencia,
-        "products": products,
-        "resources": resources,
-        "consumptions": consumptions
+        "demanda": demanda,
+        "jornada_horas": jornada_horas,
+        "costo_diario": costo_diario,
+        "bonificacion": bonificacion_por_cambio
     }
 
 def unpack_data(data_dict):
     try:
-        return (data_dict["name"],
-                data_dict["dias"],
-                data_dict["tareas"],
-                data_dict["eficiencia"],
-                data_dict["products"],
-                data_dict["resources"],
-                data_dict["consumptions"])
+        return (
+            data_dict["name"],
+            data_dict["empleados"],
+            data_dict["tareas"],
+            data_dict["dias"],
+            data_dict["eficiencia"],
+            data_dict["demanda"],
+            data_dict["jornada_horas"],
+            data_dict["costo_diario"],
+            data_dict["bonificacion"]
+        )
     except Exception as e:
-        raise ValueError(f"Faltan datos de entrada: {e}")
+        raise ValueError(f"ERROR: faltan datos de entrada: {e}")
