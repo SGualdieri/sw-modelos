@@ -17,8 +17,8 @@ def create_data_dict():
 
     demanda = {
         ("Reponer", "Viernes"): 500, #uso la misma cantidad que el sabado
-        ("Reponer", "Sabado"): 350,
-        ("Reponer", "Domingo"): 450,
+        ("Reponer", "Sabado"): 500,
+        ("Reponer", "Domingo"): 350,
         ("Ordenar", "Viernes"): 300,
         ("Ordenar", "Domingo"): 300, #uso lo mismo que el viernes
         ("Marcar", "Viernes"): 150,
