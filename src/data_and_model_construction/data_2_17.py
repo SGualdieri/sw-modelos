@@ -28,7 +28,6 @@ def create_data_dict():
 
     jornada_horas = 8
     costo_diario = 12
-    bonificacion_por_cambio = 0.10
 
     return {
         "name": name,
@@ -39,7 +38,6 @@ def create_data_dict():
         "demanda": demanda,
         "jornada_horas": jornada_horas,
         "costo_diario": costo_diario,
-        "bonificacion": bonificacion_por_cambio
     }
 
 def unpack_data(data_dict):
@@ -53,7 +51,6 @@ def unpack_data(data_dict):
             data_dict["demanda"],
             data_dict["jornada_horas"],
             data_dict["costo_diario"],
-            data_dict["bonificacion"]
         )
     except Exception as e:
         raise ValueError(f"ERROR: faltan datos de entrada: {e}")

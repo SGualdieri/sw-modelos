@@ -3,110 +3,102 @@
 from docplex.mp.model import Model
 from docplex.mp.constants import ComparisonType
 from .data_2_17 import unpack_data
+from data_related_utils import BIG_M
 
 def create_model(data_dict):
     (
         name, empleados, tareas, dias,
         eficiencia, demanda, jornada_horas,
-        costo_diario, bonificacion
+        costo_diario
     ) = unpack_data(data_dict)
 
     mdl = Model(name)
 
-    # --- VARIABLES ---
-    x = mdl.binary_var_cube(empleados, tareas, dias, name="x")
-    trabaja = mdl.binary_var_matrix(empleados, dias, name="trabaja")
-    cambia = mdl.binary_var_matrix(empleados, dias[1:], name="cambia")
+    # Número de empleados asignados a cada tarea cada día
+    x = mdl.integer_var_dict([(t, d) for t in tareas for d in dias], lb=0, ub=len(empleados), name="x")
 
-    # Nueva variable auxiliar para linealizar eficiencia bonificada
-    z = {
-        (e, t, d): mdl.binary_var(name=f"z_{e}_{t}_{d}")
-        for e in empleados for t in tareas for d in dias[1:]
-    }
+    # Total de empleados trabajando cada día
+    trabaja = mdl.integer_var_dict(dias, lb=0, ub=len(empleados), name="trabaja")
 
-    # --- RESTRICCIONES ---
-
-    # 1 tarea por empleado por día
-    for e in empleados:
-        for d in dias:
-            mdl.add_constraint(mdl.sum(x[e, t, d] for t in tareas) <= 1, f"una_tarea_{e}_{d}")
-
-    # trabajar si tiene alguna tarea
-    for e in empleados:
-        for d in dias:
-            mdl.add_constraint(mdl.sum(x[e, t, d] for t in tareas) == trabaja[e, d], f"trabaja_{e}_{d}")
-
-    # detectar cambio de tarea
-    for e in empleados:
-        for i in range(1, len(dias)):
-            d = dias[i]
-            d_ant = dias[i - 1]
-            for t1 in tareas:
-                for t2 in tareas:
-                    if t1 != t2:
-                        mdl.add_constraint(
-                            cambia[e, d] >= x[e, t1, d_ant] + x[e, t2, d] - 1,
-                            f"cambio_{e}_{d}_{t1}_{t2}"
-                        )
-
-    # Linealización de bonificación: z[e,t,d] = x[e,t,d] AND cambia[e,d]
-    for e in empleados:
-        for d in dias[1:]:
-            for t in tareas:
-                mdl.add_constraint(z[e, t, d] <= x[e, t, d], f"z1_{e}_{t}_{d}")
-                mdl.add_constraint(z[e, t, d] <= cambia[e, d], f"z2_{e}_{t}_{d}")
-                mdl.add_constraint(z[e, t, d] >= x[e, t, d] + cambia[e, d] - 1, f"z3_{e}_{t}_{d}")
-
-    # cubrir demanda diaria por tarea
+    # Relación: empleados trabajando = suma de tareas ese día
     for d in dias:
+        mdl.add_constraint(
+            trabaja[d] == mdl.sum(x[t, d] for t in tareas),
+            f"trabajadores_dia_{d}"
+        )
+        mdl.add_constraint(
+            trabaja[d] <= len(empleados),
+            f"limite_empleados_{d}"
+        )
+
+    # Eficiencia
+    for i, d in enumerate(dias):
         for t in tareas:
             if (t, d) not in demanda:
                 continue
-            demanda_t_d = demanda[(t, d)]
+            prod_base = x[t, d] * eficiencia[t] * jornada_horas
+            if i > 0:
+                # Aumenta 10% si cambia de tarea respecto al día anterior
+                prod_base *= (1 + 0.1)
 
-            if d == dias[0]:  # viernes
-                eficiencia_total = mdl.sum(
-                    x[e, t, d] * eficiencia[t] * jornada_horas
-                    for e in empleados
-                )
-            else:
-                eficiencia_total = mdl.sum(
-                    eficiencia[t] * jornada_horas * (x[e, t, d] + bonificacion * z[e, t, d])
-                    for e in empleados
-                )
+            mdl.add_constraint(
+                prod_base >= demanda[(t, d)],
+                f"demanda_{t}_{d}"
+            )
 
-            mdl.add_constraint(eficiencia_total >= demanda_t_d, f"demanda_{t}_{d}")
-
-    # --- OBJETIVO ---
-    total_costo = mdl.sum(trabaja[e, d] * costo_diario for e in empleados for d in dias)
+    total_costo = mdl.sum(trabaja[d] * costo_diario for d in dias)
     mdl.minimize(total_costo)
-    mdl.print_information()
 
-    return mdl, x, trabaja, cambia
+    return mdl, x, trabaja
+
 
 def print_model(mdl):
+
     print("--------------------")
     print(f"Model: {mdl.name}")
+
     print("Constraints:")
+
+    # Print all constraints, except for ">= 0" and "<= inf"
     for constraint in mdl.iter_constraints():
+        # Only attemp to get rhs if constraint has that attr
+        # (there exist other constraint types that do not have it)
         if hasattr(constraint, "rhs"):
-            le_to_inf = constraint.rhs.equals(float('inf')) and constraint.sense == ComparisonType.LE
-            ge_to_zero = constraint.sense == ComparisonType.GE and constraint.rhs.equals(0)
-            if le_to_inf or ge_to_zero:
+           
+            # This way of comparing is the only way that works (not "!=", do not attemp "==")
+            le_to_inf = constraint.rhs.equals(BIG_M) and constraint.sense == ComparisonType.LE
+            if le_to_inf: # ignore "<= inf"
                 continue
+            
+            ge_to_zero = constraint.sense == ComparisonType.GE and constraint.rhs.equals(0)
+            if ge_to_zero: # ignore ">= 0"
+                continue
+
             print(f"   {constraint}")
+
     print(f"Objective: {mdl.objective_expr}")
     print(f" {mdl.objective_sense.name}")
+    
     print("--------------------")
 
-def solve_model(mdl, x, trabaja, cambia):
+
+def solve_model(mdl, x, trabaja):
     solution = mdl.solve()
 
     if not solution:
-        print("❌ No se pudo resolver el modelo.")
+        print("No se pudo resolver el modelo.")
         return
 
-    print(f"\n✅ Costo total mínimo: ${mdl.objective_value}\n")
-    for (e, t, d), var in x.items():
-        if var.solution_value > 0.5:
-            print(f"🧑 Empleado {e} hace tarea '{t}' el {d}")
+    print(f"\n Costo total mínimo: ${mdl.objective_value}\n")
+
+    print("Asignación de empleados por tarea y día:")
+    for (t, d), var in x.items():
+        cantidad = int(round(var.solution_value))
+        if cantidad > 0:
+            print(f"{cantidad} empleados hacen '{t}' el {d}")
+
+    print("\n Empleados trabajando por día:")
+    for d, var in trabaja.items():
+        cantidad = int(round(var.solution_value))
+        print(f" {d}: {cantidad} empleados")
+
