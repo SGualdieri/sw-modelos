@@ -44,15 +44,7 @@ class CurvaDeOferta(PlotKind):
         iterator = PriceIterator(product_name, products, production_vars)
         current_price_value, prices, quantities = iterator.iterate_over_price(mdl, self.get_y)
         
-        # Le agregamos el punto de x=0 al inicio, porque la función que itera solo contempla números no negativos
-        # AUX: esto puede ir adentro de iterator []    
-        price = 0     
-        _ = iterator.solve(price, mdl)
-        quantity = self.get_y(prod_var)
-        x_values = [price] + prices
-        y_values = [quantity] + quantities
-
-        return current_price_value, x_values, y_values
+        return current_price_value, prices, quantities
 
 
 ### Comentarios de debug, entre iterate y plot
