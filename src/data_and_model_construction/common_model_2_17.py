@@ -14,33 +14,32 @@ def create_model(data_dict):
 
     mdl = Model(name)
 
-    # Número de empleados asignados a cada tarea cada día
-    x = mdl.integer_var_dict([(t, d) for t in tareas for d in dias], lb=0, ub=len(empleados), name="x")
+    y = mdl.binary_var_dict([(e, t, d) for e in empleados for t in tareas for d in dias], name="y")
 
-    # Total de empleados trabajando cada día
-    trabaja = mdl.integer_var_dict(dias, lb=0, ub=len(empleados), name="trabaja")
+    for e in empleados:
+        for d in dias:
+            mdl.add_constraint(
+                mdl.sum(y[e, t, d] for t in tareas) <= 1,
+                f"unica_tarea_{e}_{d}"
+            )
 
-    # Relación: empleados trabajando = suma de tareas ese día
+    x = {(t, d): mdl.sum(y[e, t, d] for e in empleados) for t in tareas for d in dias}
+
+    trabaja = {d: mdl.sum(y[e, t, d] for e in empleados for t in tareas) for d in dias}
+
     for d in dias:
-        mdl.add_constraint(
-            trabaja[d] == mdl.sum(x[t, d] for t in tareas),
-            f"trabajadores_dia_{d}"
-        )
         mdl.add_constraint(
             trabaja[d] <= len(empleados),
             f"limite_empleados_{d}"
         )
 
-    # Eficiencia
     for i, d in enumerate(dias):
         for t in tareas:
             if (t, d) not in demanda:
                 continue
-            prod_base = x[t, d] * eficiencia[t] * jornada_horas
+            prod_base = x[(t, d)] * eficiencia[t] * jornada_horas
             if i > 0:
-                # Aumenta 10% si cambia de tarea respecto al día anterior
                 prod_base *= (1 + 0.1)
-
             mdl.add_constraint(
                 prod_base >= demanda[(t, d)],
                 f"demanda_{t}_{d}"
@@ -49,7 +48,7 @@ def create_model(data_dict):
     total_costo = mdl.sum(trabaja[d] * costo_diario for d in dias)
     mdl.minimize(total_costo)
 
-    return mdl, x, trabaja
+    return mdl, y, trabaja
 
 
 def print_model(mdl):
@@ -82,7 +81,7 @@ def print_model(mdl):
     print("--------------------")
 
 
-def solve_model(mdl, x, trabaja):
+def solve_model(mdl, y, trabaja):
     solution = mdl.solve()
 
     if not solution:
@@ -92,10 +91,10 @@ def solve_model(mdl, x, trabaja):
     print(f"\n Costo total mínimo: ${mdl.objective_value}\n")
 
     print("Asignación de empleados por tarea y día:")
-    for (t, d), var in x.items():
-        cantidad = int(round(var.solution_value))
-        if cantidad > 0:
-            print(f"{cantidad} empleados hacen '{t}' el {d}")
+    # Mostrar qué empleado hace qué tarea cada día
+    for (e, t, d), var in y.items():
+        if int(round(var.solution_value)) == 1:
+            print(f"Empleado {e} hace '{t}' el {d}")
 
     print("\n Empleados trabajando por día:")
     for d, var in trabaja.items():
