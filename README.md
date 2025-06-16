@@ -1,7 +1,7 @@
 # Descargar este código
 Para descargar el código se puede utilizar o bien git, o bien la interfaz de github.
 
-### Opción 1: usar git, por línea de comandos
+### Opción 1: usar git, por línea de comandos (recomendado)
   - Crear una carpeta, en cualquier ubicación preferida.
     Por ejemplo, dentro de `/home/al/fiuba/1c2025/modelos`, crear la carpeta `repo-modelos/`.
     **Todos los comandos siguientes (de esta sección y de las demás secciones) deben ejecutarse desde dentro de esa nueva carpeta `repo-modelos/`.**
@@ -95,5 +95,12 @@ Actualmente se cuenta con datos de prueba, modificables, en `data_and_model_cons
 
 Para ejecutar, se puede correr las celdas de los distintos notebooks, se puede iniciar basándose en `SOLVING EXAMPLE.ipynb`.
 
+Para ejecutar el código que realiza los gráficos de valor marginal, costo de oportunidad, funcional y curva de oferta, se puede utilizar el notebook `ALL IN ONE USAGE EXAMPLE Problema5tipo2.ipynb`.
+
 (Luego de modificar un archivo ".py", para ver los cambios reflejados desde un notebook se debe "Reiniciar kernel").
 La primera vez que se intente ejecutar, si es desde un ide, preguntará qué kernel se desea usar, elegir de la lista el correspondiente a ".venv".
+
+# Traer cambios
+- si se usó la opción 1 para descargar este código:
+  `git pull
+- si se usó la popción 2: repetir el procedimiento de descarga.

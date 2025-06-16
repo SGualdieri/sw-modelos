@@ -53,7 +53,7 @@ class Iterator(ABC):
         # Increase x_coord starting from upper bound + m
         right_x_list, right_y_list = self.iterate_right(initial_upper, mdl, constraint_nameX, constraint_nameY, get_y_function)
         x_values.extend(right_x_list)
-        y_values.extend(right_y_list)
+        y_values.extend(right_y_list)        
         
         # Devuelvo el current y las listas
         return current_x_value, x_values, y_values
