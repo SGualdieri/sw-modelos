@@ -27,7 +27,9 @@ def create_model(data_dict):
     CANT_MAQ_CFCM = mdl.continuous_var(name="CANT_MAQ_CFCM")
 
     EXCESO = mdl.integer_var(name="EXCESO")
-    DEFECTO = mdl.integer_var(name="DEFECTO", ub=15000)
+    
+    MAX_PRESTAMO = 15000
+    DEFECTO = mdl.integer_var(name="DEFECTO", ub=MAX_PRESTAMO)
 
     INT_GANADO = mdl.integer_var(name="INT_GANADO")
     INT_PAGADO = mdl.integer_var(name="INT_PAGADO")
@@ -43,17 +45,18 @@ def create_model(data_dict):
     mdl.add_constraint(CANT_MAQ_CFCM == 0.8*EB + 2.4*EL)
 
     # Restricciones de recursos
-    mdl.add_constraint(CANT_MAD <= 5000)
-    mdl.add_constraint(CANT_MET <= 3000)
-    mdl.add_constraint(CANT_MDO_CEA <= 800)
-    mdl.add_constraint(CANT_MAQ_CEA <= 600)
+    mdl.add_constraint(CANT_MAD <= resources[0][1])
+    mdl.add_constraint(CANT_MET <= resources[1][1])
+    mdl.add_constraint(CANT_MDO_CEA <= resources[4][1])
+    mdl.add_constraint(CANT_MAQ_CEA <= resources[5][1])
 
     # Caja disponible
     costo_insumos = 5*CANT_MAD + 8*CANT_MET + 10*CANT_PINT
     costo_horas = 20*CANT_MDO_CPM + 25*CANT_MDO_CEA + 12*CANT_MAQ_CEA + 15*CANT_MAQ_CFCM
     costos_mes = costo_horas
 
-    mdl.add_constraint(30000 - costos_mes - 8000 == EXCESO - DEFECTO)  #Agregar variable caja inicial
+    SALDO_CAJA_MINIMO = 8000
+    mdl.add_constraint(resources[7][1] - costos_mes - SALDO_CAJA_MINIMO == EXCESO - DEFECTO)  #Agregar variable caja inicial
 
     mdl.add_constraint(INT_GANADO == 0.08 * EXCESO)
     mdl.add_constraint(INT_PAGADO == 0.1 * DEFECTO)
