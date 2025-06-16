@@ -5,7 +5,7 @@ def create_data_dict():
 
     # Variables de decisión para escritorios
     products = [("EB", 500, BIG_M, 300),   # Escritorio Básico
-                ("EL", 900, BIG_M, 150)]       # Escritorio Lujo
+                ("EL", 900, 150, 0)]       # Escritorio Lujo
 
     # Recursos disponibles (nombre, capacidad)
     resources = [
