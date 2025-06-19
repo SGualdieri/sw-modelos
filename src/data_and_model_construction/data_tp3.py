@@ -9,8 +9,8 @@ def create_data_dict():
 
     # Recursos disponibles (nombre, capacidad)
     resources = [
-        ("Madera", 5000),        # kg
-        ("Metal", 3000),         # kg
+        ("Madera", 15000),        # kg
+        ("Metal", 9000),         # kg
         ("Barniz", BIG_M),
         ("Hs Mano CPM", BIG_M),
         ("Hs Mano CEA", 800),
