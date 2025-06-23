@@ -3,19 +3,19 @@ from data_related_utils import BIG_M
 def create_data_dict():
     name = "produccion_muebles_hogar"
 
-    # Variables de decisión para escritorios
-    products = [("EB", 600, BIG_M, 30),   # Escritorio Básico
-                ("EL", 1100, 30, 15)]       # Escritorio Lujo
+     # Variables de decisión para escritorios
+    products = [("EB", 700, BIG_M, 30),   # Escritorio Básico
+                ("EL", 1200, 30, 0)]       # Escritorio Lujo
 
     # Recursos disponibles (nombre, capacidad)
     resources = [
         ("Madera", 15000),        # kg
         ("Metal", 9000),         # kg
         ("Barniz", BIG_M),
-        ("Hs Mano CPM", 320),
-        ("Hs Mano CEA", 320),
-        ("Hs Maq CEA", 320),
-        ("Hs Maq CFCM", 320),
+        ("Hs Mano CPM", 640),  #640hs/mes = 8hs/dia * 20 dias * 4 empleados (2 empleados por turno)
+        ("Hs Mano CEA", 640),
+        ("Hs Maq CEA", 640),  #640hs/mes = 16hs/dia * 20 dias * 2 maquinas 
+        ("Hs Maq CFCM", 640),
         ("Caja Inicial", 50000),
     ]
 

@@ -32,14 +32,16 @@ def create_model(data_dict):
     CANT_MAQ_CFCM = mdl.continuous_var(name="CANT_MAQ_CFCM")
 
     EXCESO = mdl.continuous_var(name="EXCESO")
-    
+
     MAX_PRESTAMO = 30000
+
     DEFECTO = mdl.continuous_var(name="DEFECTO", ub=MAX_PRESTAMO)
 
     INT_GANADO = mdl.continuous_var(name="INT_GANADO")
     INT_PAGADO = mdl.continuous_var(name="INT_PAGADO")
 
     # Restricciones técnicas
+    mdl.add_constraint(CANT_MAD == consumptions['Madera'][0]*CANT_TAB + consumptions['Madera'][1]*CANT_ESTRU)
     mdl.add_constraint(CANT_MET == consumptions['Metal'][0]*CANT_PATA + consumptions['Metal'][1]*CANT_SOP)
     mdl.add_constraint(CANT_PINT == consumptions['Barniz'][0]*EB + consumptions['Barniz'][1]*EL)
 
@@ -48,17 +50,16 @@ def create_model(data_dict):
     mdl.add_constraint(CANT_PATA == 4*EB + 6*EL)
     mdl.add_constraint(CANT_SOP == 2*EL)
 
-    # MADERA
+    # Centro de procesamiento de MADERA
     mdl.add_constraint(CANT_MDO_CPM == 1.0*CANT_TAB + 1.5*CANT_ESTRU)
     
-    #METAL
+    # Centro de procesamiento de METAL
     mdl.add_constraint(CANT_MAQ_CFCM == 0.5*CANT_PATA + 0.3*CANT_SOP)
    
+    # Centro de Armado y Ensamblado
     mdl.add_constraint(CANT_MDO_CEA == 1.5*EB + 2.5*EL)
     mdl.add_constraint(CANT_MAQ_CEA == 1.0*EB + 1.8*EL)
-   
     
-    mdl.add_constraint(CANT_MAD == consumptions['Madera'][0]*CANT_TAB + consumptions['Madera'][1]*CANT_ESTRU)
 
 
     # Restricciones de recursos
@@ -83,13 +84,14 @@ def create_model(data_dict):
     mdl.add_constraint(EB >= products[0][3], ctname="DemandaMin_EB")
     mdl.add_constraint(EL <= products[0][2], ctname="DemandaMax_EB")
 
-    mdl.add_constraint(EL >= products[1][3], ctname="DemandaMin_EL")
     mdl.add_constraint(EL <= products[1][2], ctname="DemandaMax_EL")
+    mdl.add_constraint(EL >= products[1][3], ctname="DemandaMin_EL")
 
 
     # Función objetivo
     ventas = products[0][1]*EB + products[1][1]*EL
     beneficio = ventas - costo_insumos - costo_horas + INT_GANADO - INT_PAGADO
+
 
     mdl.maximize(beneficio)
 
