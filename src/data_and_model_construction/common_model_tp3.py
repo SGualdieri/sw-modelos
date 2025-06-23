@@ -11,49 +11,54 @@ def create_model(data_dict):
 
     # Variables de producción
     prod_names = [prod[0] for prod in products]
-    production_vars = mdl.integer_var_dict(prod_names, name=prod_names)
+    production_vars = mdl.continuous_var_dict(prod_names, name=prod_names)
 
     EB = production_vars["EB"]
     EL = production_vars["EL"]
 
     # Variables auxiliares de costos
-    CANT_MAD = mdl.integer_var(name="CANT_MAD")
-    CANT_MET = mdl.integer_var(name="CANT_MET")
+    CANT_MAD = mdl.continuous_var(name="CANT_MAD")
+    CANT_MET = mdl.continuous_var(name="CANT_MET")
     CANT_PINT = mdl.continuous_var(name="CANT_PINT")
 
-    CANT_TAB = mdl.integer_var(name="CANT_TAB")
-    CANT_ESTRU = mdl.integer_var(name="CANT_ESTRU")
-    CANT_PATA = mdl.integer_var(name="CANT_PATA")
-    CANT_SOP = mdl.integer_var(name="CANT_SOP")
+    CANT_TAB = mdl.continuous_var(name="CANT_TAB")
+    CANT_ESTRU = mdl.continuous_var(name="CANT_ESTRU")
+    CANT_PATA = mdl.continuous_var(name="CANT_PATA")
+    CANT_SOP = mdl.continuous_var(name="CANT_SOP")
 
     CANT_MDO_CPM = mdl.continuous_var(name="CANT_MDO_CPM")
     CANT_MDO_CEA = mdl.continuous_var(name="CANT_MDO_CEA")
     CANT_MAQ_CEA = mdl.continuous_var(name="CANT_MAQ_CEA")
     CANT_MAQ_CFCM = mdl.continuous_var(name="CANT_MAQ_CFCM")
 
-    EXCESO = mdl.integer_var(name="EXCESO")
+    EXCESO = mdl.continuous_var(name="EXCESO")
     
-    MAX_PRESTAMO = 15000
-    DEFECTO = mdl.integer_var(name="DEFECTO", ub=MAX_PRESTAMO)
+    MAX_PRESTAMO = 50000
+    DEFECTO = mdl.continuous_var(name="DEFECTO", ub=MAX_PRESTAMO)
 
-    INT_GANADO = mdl.integer_var(name="INT_GANADO")
-    INT_PAGADO = mdl.integer_var(name="INT_PAGADO")
+    INT_GANADO = mdl.continuous_var(name="INT_GANADO")
+    INT_PAGADO = mdl.continuous_var(name="INT_PAGADO")
 
     # Restricciones técnicas
-    mdl.add_constraint(CANT_MET == 2*CANT_PATA + 3*CANT_SOP)
-    mdl.add_constraint(CANT_PINT == 0.5*EB + 0.8*EL)
+    mdl.add_constraint(CANT_MET == consumptions['Metal'][0]*CANT_PATA + consumptions['Metal'][1]*CANT_SOP)
+    mdl.add_constraint(CANT_PINT == consumptions['Barniz'][0]*EB + consumptions['Barniz'][1]*EL)
 
     mdl.add_constraint(CANT_TAB == 1*EB + 2*EL)
     mdl.add_constraint(CANT_ESTRU == 1*EB + 2*EL)
     mdl.add_constraint(CANT_PATA == 4*EB + 6*EL)
     mdl.add_constraint(CANT_SOP == 2*EL)
 
-    mdl.add_constraint(CANT_MDO_CPM == 0.5*CANT_TAB + 0.7*CANT_ESTRU)
+    # MADERA
+    mdl.add_constraint(CANT_MDO_CPM == 1.0*CANT_TAB + 1.5*CANT_ESTRU)
+    
+    #METAL
+    mdl.add_constraint(CANT_MAQ_CFCM == 0.5*CANT_PATA + 0.3*CANT_SOP)
+   
     mdl.add_constraint(CANT_MDO_CEA == 1.5*EB + 2.5*EL)
     mdl.add_constraint(CANT_MAQ_CEA == 1.0*EB + 1.8*EL)
-    mdl.add_constraint(CANT_MAQ_CFCM == 0.8*EB + 2.4*EL)
+   
     
-    mdl.add_constraint(CANT_MAD == 10*CANT_TAB + 15*CANT_ESTRU)
+    mdl.add_constraint(CANT_MAD == consumptions['Madera'][0]*CANT_TAB + consumptions['Madera'][1]*CANT_ESTRU)
 
 
     # Restricciones de recursos
@@ -65,8 +70,8 @@ def create_model(data_dict):
 
     # Caja disponible
     costo_insumos = 5*CANT_MAD + 8*CANT_MET + 10*CANT_PINT
-    costo_horas = 20*CANT_MDO_CPM + 25*CANT_MDO_CEA + 12*CANT_MAQ_CEA + 15*CANT_MAQ_CFCM
-    costos_mes = costo_horas
+    costo_horas = 20*CANT_MDO_CPM + 25*CANT_MDO_CEA + 7*CANT_MAQ_CEA + 8*CANT_MAQ_CFCM
+    costos_mes = costo_horas + costo_insumos
 
     SALDO_CAJA_MINIMO = 8000
     mdl.add_constraint(resources[7][1] - costos_mes - SALDO_CAJA_MINIMO == EXCESO - DEFECTO)
@@ -76,9 +81,10 @@ def create_model(data_dict):
 
     # Demanda
     mdl.add_constraint(EB >= products[0][3], ctname="DemandaMin_EB")
+    mdl.add_constraint(EL <= products[0][2], ctname="DemandaMax_EB")
 
-    mdl.add_constraint(EL <= products[1][2], ctname="DemandaMax_EL")
     mdl.add_constraint(EL >= products[1][3], ctname="DemandaMin_EL")
+    mdl.add_constraint(EL <= products[1][2], ctname="DemandaMax_EL")
 
 
     # Función objetivo
