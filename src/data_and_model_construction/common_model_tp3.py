@@ -33,7 +33,7 @@ def create_model(data_dict):
 
     EXCESO = mdl.continuous_var(name="EXCESO")
     
-    MAX_PRESTAMO = 50000
+    MAX_PRESTAMO = 30000
     DEFECTO = mdl.continuous_var(name="DEFECTO", ub=MAX_PRESTAMO)
 
     INT_GANADO = mdl.continuous_var(name="INT_GANADO")
