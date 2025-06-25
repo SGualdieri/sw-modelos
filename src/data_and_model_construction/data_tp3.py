@@ -12,7 +12,7 @@ def create_data_dict():
         ("Madera", 15000),        # kg
         ("Metal", 9000),         # kg
         ("Barniz", BIG_M),
-        ("Hs Mano CPM", 640),  #640hs/mes = 8hs/dia * 20 dias * 4 empleados (2 empleados por turno)
+        ("Hs Mano CPM", 640),  #640hs/mes = 8hs/dia * 20 dias * 4 empleados
         ("Hs Mano CEA", 640),
         ("Hs Maq CEA", 640),  #640hs/mes = 16hs/dia * 20 dias * 2 maquinas 
         ("Hs Maq CFCM", 640),

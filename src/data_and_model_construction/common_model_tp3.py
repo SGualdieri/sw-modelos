@@ -69,6 +69,12 @@ def create_model(data_dict):
     mdl.add_constraint(CANT_MDO_CEA <= resources[4][1], ctname="Disp_MDO_CEA")
     mdl.add_constraint(CANT_MAQ_CEA <= resources[5][1], ctname="Disp_MAQ_CEA")
 
+    # Horas de MDO y MAQ
+    mdl.add_constraint(CANT_MDO_CPM <= resources[3][1], ctname="Disp_Hs_MDO_CPM")
+    mdl.add_constraint(CANT_MDO_CEA <= resources[4][1], ctname="Disp_Hs_MDO_CEA")
+    mdl.add_constraint(CANT_MAQ_CEA <= resources[5][1], ctname="Disp_Hs_MAQ_CEA")
+    mdl.add_constraint(CANT_MAQ_CFCM <= resources[6][1], ctname="Disp_Hs_MAQ_CFCM")
+    
     # Caja disponible
     costo_insumos = 5*CANT_MAD + 8*CANT_MET + 10*CANT_PINT
     costo_horas = 20*CANT_MDO_CPM + 25*CANT_MDO_CEA + 7*CANT_MAQ_CEA + 8*CANT_MAQ_CFCM
